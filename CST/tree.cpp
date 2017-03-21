@@ -30,6 +30,7 @@ void connect (Node node1, Node node2, double edgeWeight)
     // Find Node2
     // Open the file
     std::fstream fileIn = open (FILE_NAME, ios::in | ios::out | ios::binary);
+    long int pos;
 
     Node *user = new Node;
     bool userFound = false;
@@ -47,6 +48,7 @@ void connect (Node node1, Node node2, double edgeWeight)
             fileIn.write ((char*) user, sizeof (Node));
 
             userFound = true;
+            break;
         }
     }
 
@@ -57,7 +59,43 @@ void connect (Node node1, Node node2, double edgeWeight)
 
     // Write the new node
     fileIn.seekg (0, ios::end);
-    fileIn.write ((char *)user, sizeof(Node));
+    node1.parentUserId = node2.userId;
+    fileIn.write ((char *)node1, sizeof(Node));
 
     fileIn.close();
+}
+
+// propagateNodeWeight: This function updates the weight of the parent
+void propagateNodeWeight (Node node1)
+{
+    // Find the parent of the node
+    long int parentUserId = node1.parentUserId;
+    long int pos;
+
+    if (parentUserId != -1)
+    {
+        // Find the parent and update the nodeWeight.
+        std::fstream fileIn = open (FILE_NAME, ios::in | ios::out | ios::binary);
+
+        Node *user = new Node;
+
+        while (! fileIn.eof())
+        {
+            pos = fileIn.tellg();
+            fileIn.read ((char*) user, sizeof (Node));
+
+            if (user.userId == parentUserId)
+            {
+                // User found, update the edge weight.
+                user.nodeWeight += node1.nodeWeight;
+                fileIn.seekg(pos);
+                fileIn.write ((char*) user, sizeof (Node));
+
+                break;
+            }
+        }
+
+        fileIn.close();
+        propagateNodeWeight (user);
+    }
 }

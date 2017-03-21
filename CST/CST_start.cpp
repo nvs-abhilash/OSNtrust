@@ -39,7 +39,7 @@ updateCST (Edge e)
 
         else
         {
-            propagateEdgeWeight(node2, node1, edgeWeight);
+            propagateEdgeWeight (node2, node1, edgeWeight);
         }
     }
 }
