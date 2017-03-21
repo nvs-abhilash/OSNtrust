@@ -1,6 +1,9 @@
 #ifndef GRAPH_H
 #define GRAPH_H
 
+// Define the file name
+#define INPUT_FILE file.dat
+
 class Edge
 {
     long int u;

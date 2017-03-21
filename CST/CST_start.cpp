@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include "graph.h"
+#include "tree.h"
 
 updateCST (Edge e)
 {
