@@ -28,6 +28,20 @@ updateCST (Edge e)
             propagateNodeWeight (node1);
         }
     }
+
+    else
+    {
+        if (! present2)
+        {
+            connect (node2, node1, edgeWeight);
+            propagateNodeWeight (node2);
+        }
+
+        else
+        {
+            propagateEdgeWeight(node2, node1, edgeWeight);
+        }
+    }
 }
 
 
