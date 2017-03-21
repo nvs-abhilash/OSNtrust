@@ -1,19 +1,40 @@
 #include <fstream>
 #include <string>
+#include <iostream>
 #include "graph.h"
+
+const std::string FILE_NAME = "CST_out.bin";
+
+// Initialize Tree: add the default head node
+void initializeTree ()
+{
+    std::ofstream fileIn (FILE_NAME, std::ios::out | std::ios::binary);
+
+    Node *head = new Node;
+
+    head -> userId = -2;
+    head -> parentUserId = -1;
+
+    head -> nodeWeight = 0;
+    head -> edgeWeight = 0;
+
+    fileIn.write ((char*)head, sizeof(Node));
+
+    fileIn.close();
+}
 
 // Normal search function to search for the userId
 bool presentInTree (Node node)
 {
     // Open the file
-    std::ifstream fileIn = open (FILE_NAME, ios::in | ios::binary);
+    std::ifstream fileIn (FILE_NAME, std::ios::in | std::ios::binary);
 
     Node *user = new Node;
 
-    while (fileIn.read ((char*) user, sizeof (Node))
+    while (fileIn.read ((char*) user, sizeof (Node)))
     {
         // Extract in the nodeUserId
-        if (user.userId == node.userId)
+        if (user->userId == node.userId)
         {
             fileIn.close();
             return true;
@@ -29,7 +50,7 @@ void connect (Node node1, Node node2, double edgeWeight)
 {
     // Find Node2
     // Open the file
-    std::fstream fileIn = open (FILE_NAME, ios::in | ios::out | ios::binary);
+    std::fstream fileIn (FILE_NAME, std::ios::in | std::ios::out | std::ios::binary);
     long int pos;
 
     Node *user = new Node;
@@ -40,10 +61,10 @@ void connect (Node node1, Node node2, double edgeWeight)
         pos = fileIn.tellg();
         fileIn.read ((char*) user, sizeof (Node));
 
-        if (user.userId == node.userId)
+        if (user->userId == node2.userId)
         {
             // User found, update the edge weight.
-            user.edgeWeight += edgeWeight;
+            user->edgeWeight += edgeWeight;
             fileIn.seekg(pos);
             fileIn.write ((char*) user, sizeof (Node));
 
@@ -58,9 +79,9 @@ void connect (Node node1, Node node2, double edgeWeight)
     }
 
     // Write the new node
-    fileIn.seekg (0, ios::end);
+    fileIn.seekg (0, std::ios::end);
     node1.parentUserId = node2.userId;
-    fileIn.write ((char *)node1, sizeof(Node));
+    fileIn.write ((char *)&node1, sizeof(Node));
 
     fileIn.close();
 }
@@ -75,7 +96,7 @@ void propagateNodeWeight (Node node1)
     if (parentUserId != -1)
     {
         // Find the parent and update the nodeWeight.
-        std::fstream fileIn = open (FILE_NAME, ios::in | ios::out | ios::binary);
+        std::fstream fileIn (FILE_NAME, std::ios::in | std::ios::out | std::ios::binary);
 
         Node *user = new Node;
 
@@ -84,10 +105,10 @@ void propagateNodeWeight (Node node1)
             pos = fileIn.tellg();
             fileIn.read ((char*) user, sizeof (Node));
 
-            if (user.userId == parentUserId)
+            if (user->userId == parentUserId)
             {
                 // User found, update the edge weight.
-                user.nodeWeight += node1.nodeWeight;
+                user->nodeWeight += node1.nodeWeight;
                 fileIn.seekg(pos);
                 fileIn.write ((char*) user, sizeof (Node));
 
@@ -96,6 +117,6 @@ void propagateNodeWeight (Node node1)
         }
 
         fileIn.close();
-        propagateNodeWeight (user);
+        propagateNodeWeight (*user);
     }
 }

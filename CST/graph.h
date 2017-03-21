@@ -1,14 +1,11 @@
 #ifndef GRAPH_H
 #define GRAPH_H
 
-// Define the file name
-#define INPUT_FILE file.dat
-
 class Edge
 {
     long int u;
     long int v;
-    float w;
+    double w;
 
 public:
     Edge (long int u, long int v, float w)
@@ -28,7 +25,7 @@ public:
         return v;
     }
 
-    long int getW()
+    double getW()
     {
         return w;
     }

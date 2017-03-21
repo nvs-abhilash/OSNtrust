@@ -1,12 +1,30 @@
 #include <iostream>
 #include <fstream>
+#include <string.h>
 #include "graph.h"
 #include "tree.h"
 
-updateCST (Edge e)
+void updateCST (Edge e)
 {
-    Node node1.userId = e.getU();
-    Node node2.userId = e.getV();
+    Node node1, node2, head;
+
+    head.userId = -2;
+    head.parentUserId = -1;
+
+    head.nodeWeight = 0;
+    head.edgeWeight = 0;
+
+    node1.userId = e.getU();
+    node1.parentUserId = -1;
+    node1.nodeWeight = 1;
+    node1.edgeWeight = 0;
+
+    node2.userId = e.getV();
+    node2.parentUserId = -1;
+    node2.nodeWeight = 1;
+    node2.edgeWeight = 0;
+
+    double edgeWeight = e.getW();
 
     bool present1 = presentInTree (node1);
     bool present2 = presentInTree (node2);
@@ -39,15 +57,65 @@ updateCST (Edge e)
 
         else
         {
-            propagateEdgeWeight (node2, node1, edgeWeight);
+            // propagateEdgeWeight (node2, node1, edgeWeight);
         }
     }
 }
 
-
-int main ()
+int main (int argc, char* argv[])
 {
+    if (argc != 2)
+    {
+        std::cerr << "Usage: ./main <file_name.dat>\n";
+        return -1;
+    }
+
     // Open the edges file
-    fstream f = open ("filename.dat", "r");
+    char fileName[50];
+    strcpy (fileName, argv[1]);
+
+    std::fstream f (fileName, std::ios::in);
+    std::string line;
+
+    while (! f.eof())
+    {
+        std::getline(f, line);
+        int i = 0;
+
+        // Extract the edge
+        // 1. Extract node1
+        long int node1 = 0;
+        while (line[i] != ' ')
+            node1 = (node1 * 10) + (line[i] - '0');
+
+        // 2. Extract node2
+        long int node2 = 0;
+        while (line[i] != ' ')
+            node2 = (node2 * 10) + (line[i] - '0');
+
+        // 3. Extract the weight
+        double weight = 0, divisor = 0;
+
+        while (line[i] != '\0')
+        {
+            if (line[i] == '.')
+                divisor = 1;
+            else
+            {
+                weight = (weight * 10) + (line[i] - '0');
+                divisor *= 10;
+            }
+        }
+
+        weight /= divisor;
+
+        // Create the edge
+        Edge e(node1, node2, weight);
+
+        // Call the updateCST
+        updateCST (e);
+
+        return 0;
+    }
 
 }
