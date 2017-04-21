@@ -53,36 +53,12 @@ void connect (Node node1, Node node2, double edgeWeight)
     // Find Node2
     // Open the file
     std::fstream fileIn (FILE_NAME, std::ios::in | std::ios::out | std::ios::binary);
-    long int pos;
-
-    Node *user = new Node;
-    bool userFound = false;
-
-    while (! fileIn.eof())
-    {
-        pos = fileIn.tellg();
-        fileIn.read ((char*) user, sizeof (Node));
-
-        if (user->userId == node2.userId)
-        {
-            // User found, update the edge weight.
-            user->edgeWeight += edgeWeight;
-            fileIn.seekg(pos);
-            fileIn.write ((char*) user, sizeof (Node));
-
-            userFound = true;
-            break;
-        }
-    }
-
-    if (! userFound)
-    {
-        std::cerr << "Error: Cannot connect to unknown node in the CST \n";
-    }
-
+    
     // Write the new node
     fileIn.seekg (0, std::ios::end);
     node1.parentUserId = node2.userId;
+    node1.edgeWeight = edgeWeight;
+
     fileIn.write ((char *)&node1, sizeof(Node));
 
     fileIn.close();
