@@ -136,7 +136,7 @@ int getDepth (Node node) {
             nodeUserId = readNode->parentUserId;
             depth ++;
         }
-    }while (!file.eof () || (nodeUserId != HEAD_USER_ID));
+    }while (!file.eof () && (nodeUserId != HEAD_USER_ID));
 
     delete readNode;
     file.close ();
@@ -164,7 +164,7 @@ void edgeWeightPropagate (Node node1, Node node2, double edgeWeight)
         pos = file.tellg();
         file.read ((char*) readNode, sizeof (Node));
 
-        if(readNode->userId == parentNode1)
+        if (readNode->userId == parentNode1)
         {
             //update node1
             readNode->edgeWeight += edgeWeight;
@@ -182,7 +182,7 @@ void edgeWeightPropagate (Node node1, Node node2, double edgeWeight)
         pos = file.tellg();
         file.read ((char*) readNode, sizeof (Node));
 
-        if(readNode->userId == parentNode2)
+        if (readNode->userId == parentNode2)
         {
             //update node2
             readNode->edgeWeight += edgeWeight;
@@ -199,7 +199,7 @@ void edgeWeightPropagate (Node node1, Node node2, double edgeWeight)
         pos = file.tellg();
         file.read ((char*) readNode, sizeof (Node));
 
-        if(readNode->userId == parentNode2)
+        if (readNode->userId == parentNode2)
         {
             //update node1
             readNode->edgeWeight += edgeWeight;
@@ -207,7 +207,7 @@ void edgeWeightPropagate (Node node1, Node node2, double edgeWeight)
             file.write ( (char*) readNode, sizeof (Node));
             parentNode2 = readNode->parentUserId;
         }
-        else if(readNode->userId == parentNode1)
+        else if (readNode->userId == parentNode1)
         {
             //update node1
             readNode->edgeWeight += edgeWeight;
