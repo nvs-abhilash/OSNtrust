@@ -3,7 +3,7 @@
 #include <iostream>
 #include "graph.h"
 
-const std::string FILE_NAME = "CST_out.bin";
+const char FILE_NAME[] = "CST_out.bin";
 
 // Initialize Tree: add the default head node
 void initializeTree ()

@@ -74,48 +74,32 @@ int main (int argc, char* argv[])
     char fileName[50];
     strcpy (fileName, argv[1]);
 
-    std::fstream f (fileName, std::ios::in);
-    std::string line;
+    std::fstream f (fileName);
+    // std::string line;
 
     while (! f.eof())
     {
-        std::getline(f, line);
-        int i = 0;
-
         // Extract the edge
+
         // 1. Extract node1
         long int node1 = 0;
-        while (line[i] != ' ')
-            node1 = (node1 * 10) + (line[i] - '0');
+        f >> node1;
 
         // 2. Extract node2
         long int node2 = 0;
-        while (line[i] != ' ')
-            node2 = (node2 * 10) + (line[i] - '0');
+        f >> node2;
 
         // 3. Extract the weight
-        double weight = 0, divisor = 0;
-
-        while (line[i] != '\0')
-        {
-            if (line[i] == '.')
-                divisor = 1;
-            else
-            {
-                weight = (weight * 10) + (line[i] - '0');
-                divisor *= 10;
-            }
-        }
-
-        weight /= divisor;
+        double weight = 0;
+        f >> weight;
 
         // Create the edge
-        Edge e(node1, node2, weight);
+        Edge e (node1, node2, weight);
 
         // Call the updateCST
         updateCST (e);
 
-        return 0;
     }
 
+    return 0;
 }
