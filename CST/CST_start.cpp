@@ -75,7 +75,9 @@ int main (int argc, char* argv[])
     strcpy (fileName, argv[1]);
 
     std::fstream f (fileName);
-    
+
+    initializeTree ();
+
     while (! f.eof())
     {
         // Extract the edge
