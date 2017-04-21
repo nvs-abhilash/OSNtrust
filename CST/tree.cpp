@@ -3,9 +3,9 @@
 #include <iostream>
 #include "graph.h"
 
-#define HEAD_USER_ID -2
+const char FILE_NAME[] = "CST_out.bin";
 
-const std::string FILE_NAME = "CST_out.bin";
+#define HEAD_USER_ID -2
 
 // Initialize Tree: add the default head node
 void initializeTree ()
