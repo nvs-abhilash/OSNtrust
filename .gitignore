@@ -1,9 +1,9 @@
-*.pdf
-
 umn_foursquare_datasets/
 
 *.out
 *.txt
+*.bin
+*.pdf
 
 main
 
