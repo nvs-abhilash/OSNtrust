@@ -75,8 +75,7 @@ int main (int argc, char* argv[])
     strcpy (fileName, argv[1]);
 
     std::fstream f (fileName);
-    // std::string line;
-
+    
     while (! f.eof())
     {
         // Extract the edge
@@ -98,7 +97,6 @@ int main (int argc, char* argv[])
 
         // Call the updateCST
         updateCST (e);
-
     }
 
     return 0;
