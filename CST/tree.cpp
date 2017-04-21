@@ -222,3 +222,26 @@ void edgeWeightPropagate (Node node1, Node node2, double edgeWeight)
     delete readNode;
     file.close ();
 }
+
+void displayData ()
+{
+    // Open the file
+    std::ifstream fileIn (FILE_NAME, std::ios::in | std::ios::binary);
+
+    Node *user = new Node;
+    int i = 1;
+
+    while (fileIn.read ((char*) user, sizeof (Node)))
+    {
+        std::cout << "Node " << i << std::endl;
+        std::cout << "-------------------" << std::endl;
+        std::cout << "UserId: " << user->userId << std::endl;
+        std::cout << "ParentUserId: " << user->parentUserId << std::endl;
+        std::cout << "NodeWeight: " << user->nodeWeight << std::endl;
+        std::cout << "EdgeWeight: " << user->edgeWeight << std::endl;
+
+        i++;
+    }
+
+    fileIn.close();
+}
