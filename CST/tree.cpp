@@ -126,12 +126,14 @@ void propagateNodeWeight (Node node1)
 int getDepth (Node node) {
     std::fstream file ("data.bin", std::ios::in | std::ios::binary);
 
+    Node *readNode = new Node ();
+
     int depth = 0, nodeUserId = node.userId;
     do
     {
         file.read ((char*) readNode, sizeof (Node));
 
-        if(readNode->userId == nodeUserId)-
+        if(readNode->userId == nodeUserId)
         {
             nodeUserId = readNode->parentUserId;
             depth ++;
@@ -175,7 +177,7 @@ void edgeWeightPropagate (Node node1, Node node2, double edgeWeight)
         }
     }
 
-    file.tellg (std::ios::beg);
+    file.seekg (std::ios::beg);
     parentNode2 = node2.userId;
     while ((node2Depth != minDepth) && (!file.eof ()))
     {
@@ -193,7 +195,7 @@ void edgeWeightPropagate (Node node1, Node node2, double edgeWeight)
         }
     }
 
-    file.tellg (std::ios::beg);
+    file.seekg (std::ios::beg);
     while ((parentNode2 != parentNode1) && (!file.eof ()))
     {
         pos = file.tellg();
