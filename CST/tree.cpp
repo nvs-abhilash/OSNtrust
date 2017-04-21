@@ -229,17 +229,19 @@ void displayData ()
     std::ifstream fileIn (FILE_NAME, std::ios::in | std::ios::binary);
 
     Node *user = new Node;
+    int i = 1;
 
     while (fileIn.read ((char*) user, sizeof (Node)))
     {
-        std::cout << "Node " << i << endl;
-        std::cout << "-------------------" << endl;
-        std::cout << "UserId: " << userId << endl;
-        std::cout << "ParentUserId: " << parentUserId << endl;
-        std::cout << "NodeWeight: " << nodeWeight << endl;
-        std::cout << "EdgeWeight: " << edgeWeight << endl;
+        std::cout << "Node " << i << std::endl;
+        std::cout << "-------------------" << std::endl;
+        std::cout << "UserId: " << user->userId << std::endl;
+        std::cout << "ParentUserId: " << user->parentUserId << std::endl;
+        std::cout << "NodeWeight: " << user->nodeWeight << std::endl;
+        std::cout << "EdgeWeight: " << user->edgeWeight << std::endl;
+
+        i++;
     }
 
     fileIn.close();
-    return false;
 }
