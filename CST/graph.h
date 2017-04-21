@@ -1,6 +1,9 @@
 #ifndef GRAPH_H
 #define GRAPH_H
 
+#define HEAD_USER_ID -2
+#define HEAD_PARENT_ID -1
+
 class Edge
 {
     long int u;
