@@ -166,7 +166,7 @@ void propagateEdgeWeight (Node node1, Node node2, double edgeWeight)
     else
       minDepth = (node1Depth < node2Depth) ? node1Depth : node2Depth;
 
-    parentNode1 = node1.userId;
+    parentNode1 = node1.parentUserId;
     while ((node1Depth != minDepth) && (!file.eof ()))
     {
         pos = file.tellg();
@@ -180,11 +180,12 @@ void propagateEdgeWeight (Node node1, Node node2, double edgeWeight)
             file.write ( (char*) readNode, sizeof (Node));
             parentNode1 = readNode->parentUserId;
             node1Depth --;
+            file.seekg(0, std::ios::beg);
         }
     }
 
     file.seekg (std::ios::beg);
-    parentNode2 = node2.userId;
+    parentNode2 = node2.parentUserId;
     while ((node2Depth != minDepth) && (!file.eof ()))
     {
         pos = file.tellg();
@@ -198,6 +199,7 @@ void propagateEdgeWeight (Node node1, Node node2, double edgeWeight)
             file.write ( (char*) readNode, sizeof (Node));
             parentNode2 = readNode->parentUserId;
             node2Depth --;
+            file.seekg(std::ios::beg);
         }
     }
 
@@ -214,6 +216,7 @@ void propagateEdgeWeight (Node node1, Node node2, double edgeWeight)
             file.seekg (pos);
             file.write ( (char*) readNode, sizeof (Node));
             parentNode2 = readNode->parentUserId;
+            file.seekg(std::ios::beg);
         }
         else if (readNode->userId == parentNode1)
         {
@@ -222,6 +225,7 @@ void propagateEdgeWeight (Node node1, Node node2, double edgeWeight)
             file.seekg (pos);
             file.write ( (char*) readNode, sizeof (Node));
             parentNode1 = readNode->parentUserId;
+            file.seekg(std::ios::beg);
         }
     }
 
