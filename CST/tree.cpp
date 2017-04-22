@@ -47,16 +47,28 @@ long int presentInTree (Node node)
 }
 
 // Connect: A simple write operation in the file.
-void connect (Node &node1, Node &node2, double edgeWeight)
+void connect (Node &node1, Node &node2, double edgeWeight, long int node2Pos)
 {
     // Find Node2
     // Open the file
     std::fstream fileIn (FILE_NAME, std::ios::in | std::ios::out | std::ios::binary);
 
+    fileIn.seekg (node2Pos);
+    Node *readNode = new Node;
+
+    fileIn.read ((char*) readNode, sizeof (Node));
+    if (node2.userId == readNode->userId)
+    {
+        readNode->edgeWeight += edgeWeight;
+        fileIn.seekg (node2Pos);
+
+        fileIn.write ((char*) readNode, sizeof (Node));
+    }
+
     // Write the new node
     fileIn.seekg (0, std::ios::end);
     node1.parentUserId = node2.userId;
-    node1.edgeWeight = edgeWeight;
+    node1.edgeWeight = 0;
 
     fileIn.write ((char *)&node1, sizeof(Node));
 
