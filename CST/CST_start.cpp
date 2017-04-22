@@ -33,8 +33,8 @@ void updateCST (Edge e)
     {
         if (present2 == -1)
         {
-            connect (node1, head, 0, 0);
-            connect (node2, node1, edgeWeight, present1);
+            present1 = connect (node1, head, 0, 0);
+            present2 = connect (node2, node1, edgeWeight, present1);
 
             propagateNodeWeight (node1);
             propagateNodeWeight (node2);
@@ -42,7 +42,7 @@ void updateCST (Edge e)
 
         else
         {
-            connect (node1, node2, edgeWeight, present2);
+            present1 = connect (node1, node2, edgeWeight, present2);
             propagateNodeWeight (node1);
         }
     }
