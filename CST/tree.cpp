@@ -24,7 +24,7 @@ void initializeTree ()
 }
 
 // Normal search function to search for the userId
-bool presentInTree (Node node)
+long int presentInTree (Node node)
 {
     // Open the file
     std::ifstream fileIn (FILE_NAME, std::ios::in | std::ios::binary);
@@ -36,13 +36,14 @@ bool presentInTree (Node node)
         // Extract in the nodeUserId
         if (user->userId == node.userId)
         {
+            long int pos = fileIn.tellg ();
             fileIn.close();
-            return true;
+            return pos;
         }
     }
 
     fileIn.close();
-    return false;
+    return -1;
 }
 
 // Connect: A simple write operation in the file.

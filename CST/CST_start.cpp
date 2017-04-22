@@ -26,8 +26,8 @@ void updateCST (Edge e)
 
     double edgeWeight = e.getW();
 
-    bool present1 = presentInTree (node1);
-    bool present2 = presentInTree (node2);
+    bool present1 = (presentInTree (node1) != -1) ? true : false;
+    bool present2 = (presentInTree (node2) != -1) ? true : false;
 
     if (! present1)
     {
