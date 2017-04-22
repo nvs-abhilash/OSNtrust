@@ -1,7 +1,7 @@
 umn_foursquare_datasets/
 
 *.out
-*.txt
+#*.txt
 *.bin
 *.pdf
 
