@@ -53,18 +53,21 @@ void connect (Node &node1, Node &node2, double edgeWeight, long int node2Pos)
     // Open the file
     std::fstream fileIn (FILE_NAME, std::ios::in | std::ios::out | std::ios::binary);
 
-    fileIn.seekg (node2Pos);
-    Node *readNode = new Node;
-
-    fileIn.read ((char*) readNode, sizeof (Node));
-    if (node2.userId == readNode->userId)
+    if (node2.userId != HEAD_USER_ID)
     {
-        readNode->edgeWeight += edgeWeight;
         fileIn.seekg (node2Pos);
+        Node *readNode = new Node;
 
-        fileIn.write ((char*) readNode, sizeof (Node));
+        fileIn.read ((char*) readNode, sizeof (Node));
+        if (node2.userId == readNode->userId)
+        {
+            readNode->edgeWeight += edgeWeight;
+            fileIn.seekg (node2Pos);
+
+            fileIn.write ((char*) readNode, sizeof (Node));
+        }
     }
-
+    
     // Write the new node
     fileIn.seekg (0, std::ios::end);
     node1.parentUserId = node2.userId;
