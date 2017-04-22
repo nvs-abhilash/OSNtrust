@@ -8,19 +8,19 @@ void updateCST (Edge e)
 {
     Node node1, node2, head;
 
-    head.userId = -2;
-    head.parentUserId = -1;
+    head.userId = HEAD_USER_ID;
+    head.parentUserId = HEAD_PARENT_ID;
 
     head.nodeWeight = 0;
     head.edgeWeight = 0;
 
     node1.userId = e.getU();
-    node1.parentUserId = -1;
+    node1.parentUserId = HEAD_PARENT_ID;
     node1.nodeWeight = 1;
     node1.edgeWeight = 0;
 
     node2.userId = e.getV();
-    node2.parentUserId = -1;
+    node2.parentUserId = HEAD_PARENT_ID;
     node2.nodeWeight = 1;
     node2.edgeWeight = 0;
 
@@ -57,7 +57,7 @@ void updateCST (Edge e)
 
         else
         {
-            // propagateEdgeWeight (node2, node1, edgeWeight);
+            propagateEdgeWeight (node2, node1, edgeWeight);
         }
     }
 }
@@ -77,21 +77,18 @@ int main (int argc, char* argv[])
     std::fstream f (fileName);
 
     initializeTree ();
+    long int node1 = 0;
+    long int node2 = 0;
+    double weight = 0;
 
-    while (! f.eof())
+    while (true)
     {
         // Extract the edge
-
-        // 1. Extract node1
-        long int node1 = 0;
         f >> node1;
-
         // 2. Extract node2
-        long int node2 = 0;
         f >> node2;
 
         // 3. Extract the weight
-        double weight = 0;
         f >> weight;
 
         // Create the edge
@@ -99,7 +96,12 @@ int main (int argc, char* argv[])
 
         // Call the updateCST
         updateCST (e);
-    }
 
+        if (f.eof())
+          break;
+    }
+    displayData ();
+
+    f.close ();
     return 0;
 }
