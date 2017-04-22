@@ -1,9 +1,9 @@
 #ifndef TREE_H
 #define TREE_H
 
-extern bool presentInTree (Node node);
+extern long int presentInTree (Node node);
 
-extern void connect (Node &node1, Node &node2, double edgeWeight);
+extern void connect (Node &node1, Node &node2, double edgeWeight, long int node2Pos);
 
 extern void propagateNodeWeight (Node node1);
 
