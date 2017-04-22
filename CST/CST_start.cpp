@@ -26,15 +26,15 @@ void updateCST (Edge e)
 
     double edgeWeight = e.getW();
 
-    bool present1 = presentInTree (node1);
-    bool present2 = presentInTree (node2);
+    long int present1 = presentInTree (node1);
+    long int present2 = presentInTree (node2);
 
-    if (! present1)
+    if (present1 != -1)
     {
-        if (! present2)
+        if (present2 != -1)
         {
-            connect (node1, head, 0);
-            connect (node2, node1, edgeWeight);
+            connect (node1, head, 0, 0);
+            connect (node2, node1, edgeWeight, present1);
 
             propagateNodeWeight (node1);
             propagateNodeWeight (node2);
@@ -42,16 +42,16 @@ void updateCST (Edge e)
 
         else
         {
-            connect (node1, node2, edgeWeight);
+            connect (node1, node2, edgeWeight, present2);
             propagateNodeWeight (node1);
         }
     }
 
     else
     {
-        if (! present2)
+        if (present2 != -1)
         {
-            connect (node2, node1, edgeWeight);
+            connect (node2, node1, edgeWeight, present1);
             propagateNodeWeight (node2);
         }
 
