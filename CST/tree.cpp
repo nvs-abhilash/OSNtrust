@@ -90,11 +90,11 @@ void getUser (Node &user)
 // propagateNodeWeight: This function updates the weight of the parent
 void propagateNodeWeight (Node node1)
 {
+    getUser (node1);
+
     // Find the parent of the node
     long int parentUserId = node1.parentUserId;
     long int pos;
-
-    getUser (node1);
 
     if (parentUserId != HEAD_PARENT_ID)
     {
