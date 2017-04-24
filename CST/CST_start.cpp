@@ -1,8 +1,11 @@
 #include <iostream>
 #include <fstream>
 #include <string.h>
+#include <vector>
+
 #include "graph.h"
 #include "tree.h"
+#include "partition.h"
 
 void updateCST (Edge e)
 {
@@ -103,5 +106,12 @@ int main (int argc, char* argv[])
     displayData ();
 
     f.close ();
+
+    std::vector<Node> allUsers = sortAmortized ();
+
+    // Print data
+    std::cout << allUsers.size() << std::endl;
+    for (std::vector<Node>::size_type i = 0; i != allUsers.size(); ++i)
+        displayNode (allUsers[i], i);
     return 0;
 }
