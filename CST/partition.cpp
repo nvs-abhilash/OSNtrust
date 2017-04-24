@@ -1,3 +1,4 @@
+#include <iostream>
 #include <fstream>
 #include <string.h>
 #include "graph.h"
@@ -28,12 +29,13 @@ std::vector <Node> sortAmortized ()
 
     while (fileIn.read ((char*) user, sizeof (Node)))
         allUsers.push_back(*user);
-
     // Call the sorting algorithm.
     sort(allUsers.begin(), allUsers.end(), compare);
 
+    delete user;
     return allUsers;
 }
+
 
 /*
 * @params: CST node array, node id(whose subtree contains the child node) and the child node id
