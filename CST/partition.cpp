@@ -12,7 +12,7 @@ const char FILE_NAME[] = "CST_out.bin";
 // Compares two intervals according to staring times.
 bool compare(Node i1, Node i2)
 {
-    return ((i1.edgeWeight)/(i1.nodeWeight) < (i1.edgeWeight) / (i1.nodeWeight));
+    return ((i1.edgeWeight)/(i1.nodeWeight) < (i2.edgeWeight) / (i2.nodeWeight));
 }
 
 std::vector <Node> sortAmortized ()

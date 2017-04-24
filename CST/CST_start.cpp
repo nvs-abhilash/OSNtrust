@@ -103,7 +103,7 @@ int main (int argc, char* argv[])
         if (f.eof())
           break;
     }
-    displayData ();
+    // displayData ();
 
     f.close ();
 
