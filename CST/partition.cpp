@@ -19,22 +19,15 @@ std::vector <Node> sortAmortized ()
 {
     Node *user = new Node;
     
-    // Number of users
-    int n;
-
     std::ifstream fileIn (FILE_NAME, std::ios::in | std::ios::binary);
-
-    // Count number of nodes.
-    while (fileIn.read ((char*) user, sizeof (Node)))
-        n++;
 
     std::vector<Node> allUsers;
     
     // Load all the users
     fileIn.seekg (0, std::ios::beg);
-    int i = 0;
+
     while (fileIn.read ((char*) user, sizeof (Node)))
-        allUsers[i++] = *user;
+        allUsers.push_back(*user);
     
     // Call the sorting algorithm.
     sort(allUsers.begin(), allUsers.end(), compare);
