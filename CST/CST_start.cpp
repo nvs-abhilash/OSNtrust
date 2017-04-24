@@ -1,8 +1,11 @@
 #include <iostream>
 #include <fstream>
 #include <string.h>
+#include <vector>
+
 #include "graph.h"
 #include "tree.h"
+#include "partition.h"
 
 void updateCST (Edge e)
 {
@@ -26,8 +29,8 @@ void updateCST (Edge e)
 
     double edgeWeight = e.getW();
 
-    long int present1 = presentInTree (node1);
-    long int present2 = presentInTree (node2);
+    long int present1 = presentInTree (node1.userId);
+    long int present2 = presentInTree (node2.userId);
 
     if (present1 == -1)
     {
@@ -100,8 +103,15 @@ int main (int argc, char* argv[])
         if (f.eof())
           break;
     }
-    displayData ();
+    // displayData ();
 
     f.close ();
+
+    std::vector<Node> allUsers = sortAmortized ();
+
+    // Print data
+    std::cout << allUsers.size() << std::endl;
+    for (std::vector<Node>::size_type i = 0; i != allUsers.size(); ++i)
+        displayNode (allUsers[i], i);
     return 0;
 }
