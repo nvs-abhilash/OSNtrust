@@ -15,4 +15,6 @@ extern void getUser (Node &user);
 
 extern void displayData ();
 
+extern void displayNode (Node user, int i);
+
 #endif

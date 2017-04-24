@@ -248,6 +248,17 @@ void propagateEdgeWeight (Node node1, Node node2, double edgeWeight)
     fileInOut.close ();
 }
 
+void displayNode (Node user, int i)
+{
+    std::cout << "Node " << i << std::endl;
+    std::cout << "-------------------" << std::endl;
+    std::cout << "UserId: " << user.userId << std::endl;
+    std::cout << "ParentUserId: " << user.parentUserId << std::endl;
+    std::cout << "NodeWeight: " << user.nodeWeight << std::endl;
+    std::cout << "EdgeWeight: " << user.edgeWeight << std::endl;
+    std::cout << std::endl;
+}
+
 void displayData ()
 {
     // Open the file
@@ -258,13 +269,7 @@ void displayData ()
 
     while (fileIn.read ((char*) user, sizeof (Node)))
     {
-        std::cout << "Node " << i << std::endl;
-        std::cout << "-------------------" << std::endl;
-        std::cout << "UserId: " << user->userId << std::endl;
-        std::cout << "ParentUserId: " << user->parentUserId << std::endl;
-        std::cout << "NodeWeight: " << user->nodeWeight << std::endl;
-        std::cout << "EdgeWeight: " << user->edgeWeight << std::endl;
-        std::cout << std::endl;
+        displayNode (*user, i);
         i++;
     }
     delete user;
