@@ -141,7 +141,6 @@ void partitionGraph (std::vector<Node> &CST, int k)
       }
     }
     part[currPart - 1] += CST[nodeIdx].nodeWeight;
-    part[currPart] += CST[nodeIdx].nodeWeight;
     edgeCut += CST[nodeIdx].edgeWeight;
     assignPart (CST, nodeIdx, currPart);
     unPropagate (CST, CST[nodeIdx].nodeWeight, CST[nodeIdx].parentUserId);
