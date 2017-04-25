@@ -52,7 +52,7 @@ void unPropagate (std::vector<Node> CST, int nodeWeight, int nodeId)
 {
   int i;
 
-  while(nodeId != HEAD_USER_ID)
+  while(nodeId != HEAD_PARENT_ID)
   {
     for(i = 0; i < (int)CST.size(); i++)
     {
@@ -69,7 +69,7 @@ void unPropagate (std::vector<Node> CST, int nodeWeight, int nodeId)
 int getSuitableNode (std::vector<Node> CST, int partSize)
 {
   for(std::vector<int>::size_type i = 0; i != CST.size(); i++)
-      if (partHash[i] == 0 && CST[i].nodeWeight <= partSize)
+      if (partHash[i] == 0 && CST[i].nodeWeight <= partSize && CST[i].userId != HEAD_USER_ID)
         return i;
 
   return -1;
@@ -107,7 +107,60 @@ void partitionGraph (std::vector<Node> CST, int k)
       unPropagate (CST, CST[nodeIdx].nodeWeight, CST[nodeIdx].parentUserId);
     }
 
-    if (((partSize - part[currPart]) <= (partSize / 2)) && nodeIdx == -1)
+    if (((partSize - part[currPart]) <= (partSize / 2)) || nodeIdx == -1)
       currPart ++;
   }
 }
+
+void writePartition (std::vector<Node> CST, int k)
+{
+  // // Open all the partition files
+  // char **fNames = new char *[k];
+  // for (int i = 0; i < k; i++)
+  // {
+  //   fNames[i] = new char[50];
+  //   if (fNames[i] == NULL)
+  //   {
+  //     std::cerr << "Error allocating memory";
+  //     return;
+  //   }
+
+  //   sprintf(fNames[i], "part_%d.txt", i + 1);
+  // }
+
+  // std::ofstream *fPtr = new std::ofstream [k];
+  // for (int i = 0; i < k; i++)
+  //   fPtr[i].open (fNames[i], std::ios::out | std::ios::binary);
+
+  std::ofstream fPtr1, fPtr2;
+
+  fPtr1.open ("part_1.bin", std::ios::out | std::ios::binary);
+  fPtr2.open ("part_2.bin", std::ios::out | std::ios::binary);
+
+  for (std::vector<int>::size_type i = 0; i != CST.size(); i++)
+  {
+    if (partHash[i] == 1)
+    {
+      std::cout << "Part 1:" << std::endl;
+      displayNode (CST[i], i);
+      fPtr1.write ((char *) &CST[i], sizeof (CST[i]));
+    }
+
+    else
+    {
+      std::cout << "Part 2: " << std::endl;
+      displayNode (CST[i], i);
+      fPtr2.write ((char *) &CST[i], sizeof (CST[i]));
+    }
+  }
+
+
+  // for (int i = 0; i < k; i++)
+  // {
+  //   fPtr[i].close();
+  //   delete fNames[i];
+  // }
+  // delete fPtr;
+
+}
+

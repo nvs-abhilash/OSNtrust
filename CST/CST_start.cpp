@@ -118,5 +118,8 @@ int main (int argc, char* argv[])
         displayNode (allUsers[i], i);
 
     partitionGraph (allUsers, K);
+
+    writePartition (allUsers, K);
+
     return 0;
 }
