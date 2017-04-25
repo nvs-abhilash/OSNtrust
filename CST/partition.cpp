@@ -6,8 +6,6 @@
 #include <bits/stdc++.h>
 #include <vector>
 
-#define HEAD_PARENT_ID -1
-
 const char FILE_NAME[] = "CST_out.bin";
 
 int *partHash;
@@ -39,7 +37,7 @@ std::vector <Node> sortAmortized (int k)
 
     //Hash partition
     partHash = new int[(int)allUsers.size()] ();
-    part = new int[k] (); 
+    part = new int[k] ();
 
     delete user;
     return allUsers;
@@ -50,24 +48,21 @@ std::vector <Node> sortAmortized (int k)
 * @params: CST node array, node id(whose subtree contains the child node) and the child node id
 * @returns: edge-cut cost
 */
-void unPropagate (std::vector<Node> CST, int childNodeId, int nodeId)
+void unPropagate (std::vector<Node> CST, int nodeWeight, int nodeId)
 {
-  int parentPos = -1, childPos = -1;
+  int i;
 
-  while(nodeId != HEAD_PARENT_ID)
+  while(nodeId != HEAD_USER_ID)
   {
-    for(int i = 0; i < (int)CST.size(); i++)
+    for(i = 0; i < (int)CST.size(); i++)
     {
       if(CST[i].userId == nodeId)
-        parentPos = i;
-      else if(CST[i].userId == childNodeId)
-        childPos = i;
-
-      if(parentPos >= 0 && childPos >= 0)
+      {
+        CST[i].nodeWeight -= nodeWeight;
+        nodeId = CST[i].parentUserId;
         break;
+      }
     }
-    CST[parentPos].nodeWeight -= CST[childPos].nodeWeight;
-    nodeId = CST[parentPos].parentUserId;
   }
 }
 
@@ -87,8 +82,8 @@ void assignPart (std::vector<Node> CST, int nodeIdx, int currPart)
 
   if(CST[nodeIdx].nodeWeight == 1)
     return;
-  
-  for(std::vector<int>::size_type i = 0; i != CST.size(); i++) 
+
+  for(std::vector<int>::size_type i = 0; i != CST.size(); i++)
   {
     if (CST[i].parentUserId == CST[nodeIdx].userId)
     {
@@ -109,7 +104,7 @@ void partitionGraph (std::vector<Node> CST, int k)
     if (nodeIdx != -1)
     {
       assignPart (CST, nodeIdx, currPart);
-      unPropagate (CST, CST[nodeIdx].userId, CST[nodeIdx].parentUserId);
+      unPropagate (CST, CST[nodeIdx].nodeWeight, CST[nodeIdx].parentUserId);
     }
 
     if (((partSize - part[currPart]) <= (partSize / 2)) && nodeIdx == -1)
