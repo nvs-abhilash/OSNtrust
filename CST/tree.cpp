@@ -56,22 +56,6 @@ long int connect (Node &node1, Node &node2, double edgeWeight, long int node2Pos
     // Open the file
     std::fstream fileInOut (FILE_NAME, std::ios::in | std::ios::out | std::ios::binary);
 
-    // if (node2.userId != HEAD_USER_ID)
-    // {
-    //     fileInOut.seekg (node2Pos);
-    //     Node *readNode = new Node;
-    //
-    //     fileInOut.read ((char*) readNode, sizeof (Node));
-    //     if (node2.userId == readNode->userId)
-    //     {
-    //         readNode->edgeWeight += edgeWeight;
-    //         fileInOut.seekp (node2Pos);
-    //
-    //         fileInOut.write ((char*) readNode, sizeof (Node));
-    //     }
-    //     delete readNode;
-    // }
-
     // Write the new node
     fileInOut.seekp (0, std::ios::end);
     node2Pos = fileInOut.tellp ();

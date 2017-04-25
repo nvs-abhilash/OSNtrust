@@ -98,19 +98,6 @@ void partitionGraph (std::vector<Node> &CST, int k)
   int threshold = ceil (partSize / (float) 2);
   int nodeIdx = -1, edgeCut = 0;
 
-  // while (currPart <= k)
-  // {
-  //   nodeIdx = getSuitableNode (CST, partSize - part[currPart]);
-  //   if (nodeIdx != -1)
-  //   {
-  //     assignPart (CST, nodeIdx, currPart);
-  //     unPropagate (CST, CST[nodeIdx].nodeWeight, CST[nodeIdx].parentUserId);
-  //   }
-  //
-  //   if (((partSize - part[currPart]) < (partSize / 2)) && nodeIdx == -1)
-  //     currPart ++;
-  // }
-
   while(true)
   {
     currPart = 1;
