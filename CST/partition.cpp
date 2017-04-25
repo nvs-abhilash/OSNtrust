@@ -121,7 +121,7 @@ void partitionGraph (std::vector<Node> &CST, int k)
       if(part[currPart] >= threshold)
         nodeIdx = -1;
       else
-        nodeIdx = getSuitableNode (CST, partSize - part[currPart], threshold);
+        nodeIdx = getSuitableNode (CST, partSize - part[currPart]);
 
       if(nodeIdx != -1)
         break;
@@ -179,7 +179,6 @@ void writePartition (std::vector<Node> &CST, int k)
       displayNode (CST[i], i);
       fPtr1.write ((char *) &CST[i], sizeof (CST[i]));
     }
-
     else if(partHash[i] == 2)
     {
       std::cout << "Part 2: " << std::endl;
