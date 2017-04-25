@@ -95,20 +95,41 @@ void assignPart (std::vector<Node> CST, int nodeIdx, int currPart)
 void partitionGraph (std::vector<Node> CST, int k)
 {
   int currPart = 1;
-  int partSize = ((int) CST.size() / k);
-  int nodeIdx;
+  int partSize = (((int) CST.size() - 1) / k);
+  int nodeIdx = -1;
 
-  while (currPart <= k)
+  // while (currPart <= k)
+  // {
+  //   nodeIdx = getSuitableNode (CST, partSize - part[currPart]);
+  //   if (nodeIdx != -1)
+  //   {
+  //     assignPart (CST, nodeIdx, currPart);
+  //     unPropagate (CST, CST[nodeIdx].nodeWeight, CST[nodeIdx].parentUserId);
+  //   }
+  //
+  //   if (((partSize - part[currPart]) < (partSize / 2)) && nodeIdx == -1)
+  //     currPart ++;
+  // }
+
+  while(true)
   {
-    nodeIdx = getSuitableNode (CST, partSize - part[currPart]);
-    if (nodeIdx != -1)
+    currPart = 1;
+    while(nodeIdx == -1)
     {
-      assignPart (CST, nodeIdx, currPart);
-      unPropagate (CST, CST[nodeIdx].nodeWeight, CST[nodeIdx].parentUserId);
-    }
+      nodeIdx = getSuitableNode (CST, partSize - part[currPart]);
 
-    if (((partSize - part[currPart]) <= (partSize / 2)) || nodeIdx == -1)
+      if(nodeIdx != -1)
+        break;
       currPart ++;
+
+      if(currPart > k)
+      {
+        //Place rem nodes
+        return;
+      }
+    }
+    assignPart (CST, nodeIdx, currPart);
+    unPropagate (CST, CST[nodeIdx].nodeWeight, CST[nodeIdx].parentUserId);
   }
 }
 
@@ -132,10 +153,11 @@ void writePartition (std::vector<Node> CST, int k)
   // for (int i = 0; i < k; i++)
   //   fPtr[i].open (fNames[i], std::ios::out | std::ios::binary);
 
-  std::ofstream fPtr1, fPtr2;
+  std::ofstream fPtr1, fPtr2, fPtr3;
 
   fPtr1.open ("part_1.bin", std::ios::out | std::ios::binary);
   fPtr2.open ("part_2.bin", std::ios::out | std::ios::binary);
+  fPtr3.open ("part_3.bin", std::ios::out | std::ios::binary);
 
   for (std::vector<int>::size_type i = 0; i != CST.size(); i++)
   {
@@ -146,11 +168,17 @@ void writePartition (std::vector<Node> CST, int k)
       fPtr1.write ((char *) &CST[i], sizeof (CST[i]));
     }
 
-    else
+    else if(partHash[i] == 2)
     {
       std::cout << "Part 2: " << std::endl;
       displayNode (CST[i], i);
       fPtr2.write ((char *) &CST[i], sizeof (CST[i]));
+    }
+    else if(partHash[i] == 3)
+    {
+      std::cout << "Part 3: " << std::endl;
+      displayNode (CST[i], i);
+      fPtr3.write ((char *) &CST[i], sizeof (CST[i]));
     }
   }
 
@@ -163,4 +191,3 @@ void writePartition (std::vector<Node> CST, int k)
   // delete fPtr;
 
 }
-
