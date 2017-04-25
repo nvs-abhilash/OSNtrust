@@ -96,7 +96,7 @@ void partitionGraph (std::vector<Node> &CST, int k)
 {
   int currPart = 1;
   int partSize = ceil ((CST.size() - 1) / (float) k);
-  int threshold = partSize / 2;
+  int threshold = ceil (partSize / (float) 2);
   int nodeIdx = -1;
 
   // while (currPart <= k)
