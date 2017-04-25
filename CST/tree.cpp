@@ -56,27 +56,27 @@ long int connect (Node &node1, Node &node2, double edgeWeight, long int node2Pos
     // Open the file
     std::fstream fileInOut (FILE_NAME, std::ios::in | std::ios::out | std::ios::binary);
 
-    if (node2.userId != HEAD_USER_ID)
-    {
-        fileInOut.seekg (node2Pos);
-        Node *readNode = new Node;
-
-        fileInOut.read ((char*) readNode, sizeof (Node));
-        if (node2.userId == readNode->userId)
-        {
-            readNode->edgeWeight += edgeWeight;
-            fileInOut.seekp (node2Pos);
-
-            fileInOut.write ((char*) readNode, sizeof (Node));
-        }
-        delete readNode;
-    }
+    // if (node2.userId != HEAD_USER_ID)
+    // {
+    //     fileInOut.seekg (node2Pos);
+    //     Node *readNode = new Node;
+    //
+    //     fileInOut.read ((char*) readNode, sizeof (Node));
+    //     if (node2.userId == readNode->userId)
+    //     {
+    //         readNode->edgeWeight += edgeWeight;
+    //         fileInOut.seekp (node2Pos);
+    //
+    //         fileInOut.write ((char*) readNode, sizeof (Node));
+    //     }
+    //     delete readNode;
+    // }
 
     // Write the new node
     fileInOut.seekp (0, std::ios::end);
     node2Pos = fileInOut.tellp ();
     node1.parentUserId = node2.userId;
-    node1.edgeWeight = 0;
+    node1.edgeWeight = edgeWeight;
 
     fileInOut.write ((char *)&node1, sizeof(Node));
 
@@ -186,7 +186,7 @@ void propagateEdgeWeight (Node node1, Node node2, double edgeWeight)
     else
       minDepth = (node1Depth < node2Depth) ? node1Depth : node2Depth;
 
-    parentNode1 = node1.parentUserId;
+    parentNode1 = node1.userId;
     pos = fileInOut.tellg();
     while ((node1Depth != minDepth) && (fileInOut.read ((char*) readNode, sizeof (Node))))
     {
@@ -204,7 +204,7 @@ void propagateEdgeWeight (Node node1, Node node2, double edgeWeight)
     }
 
     fileInOut.seekg (0, std::ios::beg);
-    parentNode2 = node2.parentUserId;
+    parentNode2 = node2.userId;
     pos = fileInOut.tellg();
     while ((node2Depth != minDepth) && (fileInOut.read ((char*) readNode, sizeof (Node))))
     {
