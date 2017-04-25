@@ -117,10 +117,10 @@ void partitionGraph (std::vector<Node> &CST, int k)
     nodeIdx = -1;
     while(nodeIdx == -1)
     {
-      if(part[currPart] >= threshold)
+      if(part[currPart - 1] >= threshold)
         nodeIdx = -1;
       else
-        nodeIdx = getSuitableNode (CST, partSize - part[currPart]);
+        nodeIdx = getSuitableNode (CST, partSize - part[currPart - 1]);
 
       if(nodeIdx != -1)
         break;
@@ -139,7 +139,7 @@ void partitionGraph (std::vector<Node> &CST, int k)
         return;
       }
     }
-    part[currPart] += CST[nodeIdx].nodeWeight;
+    part[currPart - 1] += CST[nodeIdx].nodeWeight;
     assignPart (CST, nodeIdx, currPart);
     unPropagate (CST, CST[nodeIdx].nodeWeight, CST[nodeIdx].parentUserId);
   }
