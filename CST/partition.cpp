@@ -96,7 +96,7 @@ void partitionGraph (std::vector<Node> &CST, int k)
   int currPart = 1;
   int partSize = ceil ((CST.size() - 1) / (float) k);
   int threshold = ceil (partSize / (float) 2);
-  int nodeIdx = -1;
+  int nodeIdx = -1, edgeCut = 0;
 
   // while (currPart <= k)
   // {
@@ -136,10 +136,13 @@ void partitionGraph (std::vector<Node> &CST, int k)
             partHash[i] = k;//last partition
           }
         }
+        std::cout << "\n\nEdge Cut = " << edgeCut << std::endl;
         return;
       }
     }
     part[currPart - 1] += CST[nodeIdx].nodeWeight;
+    part[currPart] += CST[nodeIdx].nodeWeight;
+    edgeCut += CST[nodeIdx].edgeWeight;
     assignPart (CST, nodeIdx, currPart);
     unPropagate (CST, CST[nodeIdx].nodeWeight, CST[nodeIdx].parentUserId);
   }
