@@ -48,7 +48,7 @@ std::vector <Node> sortAmortized (int k)
 * @params: CST node array, node id(whose subtree contains the child node) and the child node id
 * @returns: edge-cut cost
 */
-void unPropagate (std::vector<Node> CST, int nodeWeight, int nodeId)
+void unPropagate (std::vector<Node> &CST, int nodeWeight, int nodeId)
 {
   int i;
 
@@ -66,7 +66,7 @@ void unPropagate (std::vector<Node> CST, int nodeWeight, int nodeId)
   }
 }
 
-int getSuitableNode (std::vector<Node> CST, int partSize)
+int getSuitableNode (std::vector<Node> &CST, int partSize)
 {
   for(std::vector<int>::size_type i = 0; i != CST.size(); i++)
       if (partHash[i] == 0 && CST[i].nodeWeight <= partSize && CST[i].userId != HEAD_USER_ID)
@@ -75,9 +75,8 @@ int getSuitableNode (std::vector<Node> CST, int partSize)
   return -1;
 }
 
-void assignPart (std::vector<Node> CST, int nodeIdx, int currPart)
+void assignPart (std::vector<Node> &CST, int nodeIdx, int currPart)
 {
-  part[currPart] += CST[nodeIdx].nodeWeight;
   partHash[nodeIdx] = currPart;
 
   if(CST[nodeIdx].nodeWeight == 1)
@@ -85,82 +84,82 @@ void assignPart (std::vector<Node> CST, int nodeIdx, int currPart)
 
   for(std::vector<int>::size_type i = 0; i != CST.size(); i++)
   {
-    if (CST[i].parentUserId == CST[nodeIdx].userId)
+    if ((CST[i].parentUserId == CST[nodeIdx].userId) && partHash[i] == 0)
     {
       assignPart (CST, i, currPart);
     }
   }
 }
 
-void partitionGraph (std::vector<Node> CST, int k)
+void partitionGraph (std::vector<Node> &CST, int k)
 {
   int currPart = 1;
-  int partSize = ((int) CST.size() / k);
-  int nodeIdx;
+  int partSize = ceil ((CST.size() - 1) / (float) k);
+  int threshold = ceil (partSize / (float) 2);
+  int nodeIdx = -1, edgeCut = 0;
 
-  while (currPart <= k)
+  while(true)
   {
-    nodeIdx = getSuitableNode (CST, partSize - part[currPart]);
-    if (nodeIdx != -1)
+    currPart = 1;
+    nodeIdx = -1;
+    while(nodeIdx == -1)
     {
-      assignPart (CST, nodeIdx, currPart);
-      unPropagate (CST, CST[nodeIdx].nodeWeight, CST[nodeIdx].parentUserId);
-    }
+      if(part[currPart - 1] >= threshold)
+        nodeIdx = -1;
+      else
+        nodeIdx = getSuitableNode (CST, partSize - part[currPart - 1]);
 
-    if (((partSize - part[currPart]) <= (partSize / 2)) || nodeIdx == -1)
+      if(nodeIdx != -1)
+        break;
       currPart ++;
+
+      if(currPart > k)
+      {
+        //Place rem nodes
+        for (std::vector<int>::size_type i = 0; i != CST.size(); i++)
+        {
+          if (partHash[i] == 0 && CST[i].userId != HEAD_USER_ID)
+          {
+            partHash[i] = k;//last partition
+          }
+        }
+        std::cout << "\n\nEdge Cut = " << edgeCut << std::endl;
+        return;
+      }
+    }
+    part[currPart - 1] += CST[nodeIdx].nodeWeight;
+    edgeCut += CST[nodeIdx].edgeWeight;
+    assignPart (CST, nodeIdx, currPart);
+    unPropagate (CST, CST[nodeIdx].nodeWeight, CST[nodeIdx].parentUserId);
   }
 }
 
-void writePartition (std::vector<Node> CST, int k)
+void writePartition (std::vector<Node> &CST, int k)
 {
-  // // Open all the partition files
-  // char **fNames = new char *[k];
-  // for (int i = 0; i < k; i++)
-  // {
-  //   fNames[i] = new char[50];
-  //   if (fNames[i] == NULL)
-  //   {
-  //     std::cerr << "Error allocating memory";
-  //     return;
-  //   }
+  std::ofstream *fPtr = new std::ofstream[k];
 
-  //   sprintf(fNames[i], "part_%d.txt", i + 1);
-  // }
+  char **fileName = new char *[k];
+  for (int i = 0; i < k; i++)
+    fileName[i] = new char[50];
 
-  // std::ofstream *fPtr = new std::ofstream [k];
-  // for (int i = 0; i < k; i++)
-  //   fPtr[i].open (fNames[i], std::ios::out | std::ios::binary);
-
-  std::ofstream fPtr1, fPtr2;
-
-  fPtr1.open ("part_1.bin", std::ios::out | std::ios::binary);
-  fPtr2.open ("part_2.bin", std::ios::out | std::ios::binary);
+  for (int i = 0; i < k; i++)
+  {
+    sprintf (fileName[i], "part_%d.txt", i + 1);
+    fPtr[i].open (fileName[i], std::ios::out);
+  }
 
   for (std::vector<int>::size_type i = 0; i != CST.size(); i++)
   {
-    if (partHash[i] == 1)
-    {
-      std::cout << "Part 1:" << std::endl;
-      displayNode (CST[i], i);
-      fPtr1.write ((char *) &CST[i], sizeof (CST[i]));
-    }
-
-    else
-    {
-      std::cout << "Part 2: " << std::endl;
-      displayNode (CST[i], i);
-      fPtr2.write ((char *) &CST[i], sizeof (CST[i]));
-    }
+    if (partHash[i] >= 1 && partHash[i] <= k)
+      fPtr[partHash[i] - 1] << CST[i].userId << std::endl;
   }
 
+  for (int i = 0; i < k; i++)
+    fPtr[i].close();
+   
+  for (int i = 0; i < k; i++)
+    delete[] fileName[i];
+  delete[] fileName;
 
-  // for (int i = 0; i < k; i++)
-  // {
-  //   fPtr[i].close();
-  //   delete fNames[i];
-  // }
-  // delete fPtr;
-
+  delete[] fPtr;
 }
-

@@ -19,6 +19,4 @@ extern void displayData ();
 
 extern void displayNode (Node user, int i);
 
-extern void writePartition (std::vector<Node> CST, int k);
-
 #endif

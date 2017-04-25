@@ -7,7 +7,7 @@
 #include "tree.h"
 #include "partition.h"
 
-#define K 2
+#define K 3
 
 void updateCST (Edge e)
 {
@@ -109,13 +109,13 @@ int main (int argc, char* argv[])
 
     f.close ();
 
-    
+
     std::vector<Node> allUsers = sortAmortized (K);
 
     // Print data
     std::cout << allUsers.size() << std::endl;
-    for (std::vector<Node>::size_type i = 0; i != allUsers.size(); ++i)
-        displayNode (allUsers[i], i);
+    // for (std::vector<Node>::size_type i = 0; i != allUsers.size(); ++i)
+    //     displayNode (allUsers[i], i);
 
     partitionGraph (allUsers, K);
 
