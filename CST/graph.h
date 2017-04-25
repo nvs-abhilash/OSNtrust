@@ -43,4 +43,15 @@ typedef struct Node
     double edgeWeight;
 } Node;
 
+// typedef struct iNode
+// {
+//     long int userId;
+//     long int parentUserId;
+
+//     double nodeWeight;
+//     double edgeWeight;
+    
+//     std::vector<iNode> next;
+// } Node;
+
 #endif

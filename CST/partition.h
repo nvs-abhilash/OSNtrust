@@ -1,12 +1,14 @@
 #ifndef PARTITION_H
 #define PARTITION_H
 
-extern std::vector <Node> sortAmortized ();
+extern std::vector <Node> sortAmortized (int k);
 
-<<<<<<< HEAD
 extern void unPropagate (std::vector <Node>, int nodeId, int childNodeId);
 
+extern int getSuitableNode (std::vector<Node> CST, int partSize);
+
+extern void assignPart (std::vector<Node> CST, int nodeIdx, int currPart);
+
+extern void partitionGraph (std::vector<Node> CST, int k);
+
 #endif
-=======
-#endif
->>>>>>> 03bfc8dc0060aacfaa71a152232607cb971fa8d6
