@@ -48,7 +48,7 @@ std::vector <Node> sortAmortized (int k)
 * @params: CST node array, node id(whose subtree contains the child node) and the child node id
 * @returns: edge-cut cost
 */
-void unPropagate (std::vector<Node> CST, int nodeWeight, int nodeId)
+void unPropagate (std::vector<Node> &CST, int nodeWeight, int nodeId)
 {
   int i;
 
@@ -66,7 +66,7 @@ void unPropagate (std::vector<Node> CST, int nodeWeight, int nodeId)
   }
 }
 
-int getSuitableNode (std::vector<Node> CST, int partSize)
+int getSuitableNode (std::vector<Node> &CST, int partSize)
 {
   for(std::vector<int>::size_type i = 0; i != CST.size(); i++)
       if (partHash[i] == 0 && CST[i].nodeWeight <= partSize && CST[i].userId != HEAD_USER_ID)
@@ -75,7 +75,7 @@ int getSuitableNode (std::vector<Node> CST, int partSize)
   return -1;
 }
 
-void assignPart (std::vector<Node> CST, int nodeIdx, int currPart)
+void assignPart (std::vector<Node> &CST, int nodeIdx, int currPart)
 {
   part[currPart] += CST[nodeIdx].nodeWeight;
   partHash[nodeIdx] = currPart;
@@ -92,7 +92,7 @@ void assignPart (std::vector<Node> CST, int nodeIdx, int currPart)
   }
 }
 
-void partitionGraph (std::vector<Node> CST, int k)
+void partitionGraph (std::vector<Node> &CST, int k)
 {
   int currPart = 1;
   int partSize = (((int) CST.size() - 1) / k);
@@ -114,6 +114,7 @@ void partitionGraph (std::vector<Node> CST, int k)
   while(true)
   {
     currPart = 1;
+    nodeIdx = -1;
     while(nodeIdx == -1)
     {
       nodeIdx = getSuitableNode (CST, partSize - part[currPart]);
@@ -125,6 +126,13 @@ void partitionGraph (std::vector<Node> CST, int k)
       if(currPart > k)
       {
         //Place rem nodes
+        for (std::vector<int>::size_type i = 0; i != CST.size(); i++)
+        {
+          if (partHash[i] == 0 && CST[i].userId != HEAD_USER_ID)
+          {
+            partHash[i] = k;//last partition
+          }
+        }
         return;
       }
     }
@@ -133,7 +141,7 @@ void partitionGraph (std::vector<Node> CST, int k)
   }
 }
 
-void writePartition (std::vector<Node> CST, int k)
+void writePartition (std::vector<Node> &CST, int k)
 {
   // // Open all the partition files
   // char **fNames = new char *[k];
