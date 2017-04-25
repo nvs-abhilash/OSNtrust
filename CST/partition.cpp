@@ -105,7 +105,7 @@ void partitionGraph (std::vector<Node> CST, int k)
 
   while (currPart <= k)
   {
-    nodeIdx = getSuitableNode (CST, part[currPart]);
+    nodeIdx = getSuitableNode (CST, partSize - part[currPart]);
     if (nodeIdx != -1)
     {
       assignPart (CST, nodeIdx, currPart);
