@@ -77,7 +77,6 @@ int getSuitableNode (std::vector<Node> &CST, int partSize)
 
 void assignPart (std::vector<Node> &CST, int nodeIdx, int currPart)
 {
-  part[currPart] += CST[nodeIdx].nodeWeight;
   partHash[nodeIdx] = currPart;
 
   if(CST[nodeIdx].nodeWeight == 1)
@@ -140,6 +139,7 @@ void partitionGraph (std::vector<Node> &CST, int k)
         return;
       }
     }
+    part[currPart] += CST[nodeIdx].nodeWeight;
     assignPart (CST, nodeIdx, currPart);
     unPropagate (CST, CST[nodeIdx].nodeWeight, CST[nodeIdx].parentUserId);
   }
