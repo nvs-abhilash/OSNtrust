@@ -1,5 +1,4 @@
-
-R&D Project Report
+# R&D Project Report
 
 Algorithms for Graph Based Trust Models in 
 Online Social Networks
