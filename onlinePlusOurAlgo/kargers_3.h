@@ -16,7 +16,8 @@ struct Edge
 };
 
 
-class graph{
+class graph
+{
     public:
     int V, E;
     unordered_map<long, adjList > myvec;

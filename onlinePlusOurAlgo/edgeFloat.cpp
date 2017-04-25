@@ -44,105 +44,179 @@ int main()
     double Eweight = 0;
 
     int N_of_cluster = 0;
-    int dest_cluster=0, src_cluster=0, src_cluster_size=0, dest_cluster_size=0;
+    int dest_cluster = 0, src_cluster = 0, src_cluster_size = 0, dest_cluster_size = 0;
+
     string folder = "cluster/";
     string s_fileaddress = "";
+
     const char *address = NULL;
     queue<int> emptyClusterQueue;
     graph* tempGraph = NULL;
 
-    // graph arrOfCluster[513]; 
+    // graph arrOfCluster[513];
     graph* arrOfCluster = new graph[513];
 
     ifstream fin;
     fin.open("lac10_random_singleEdge_sg_weight.dat");
 
-	ofstream fout;
-	fout.open("deleted_cluster_num.dat");
+	ofstream deletedCluster;
+	deletedCluster.open("deleted_cluster_num.dat");
 
-	ofstream fout_edges;
-	fout_edges.open("leftout_edges.dat");
+	ofstream leftOutEdges;
+	leftOutEdges.open("leftout_edges.dat");
 
 	ofstream fout_Ecut;
 	fout_Ecut.open("Ecut.dat");
 
-    
+
 
     int progress = 0;
-    nodeHash.insert(make_pair(0,0));
+    nodeHash.insert (make_pair(0, 0));
 
+    // While loop for each streaming edge
     while (fin >> src)
     {
+        // To keep track of the number of edges encountered.
 		progress++;
 		cout << progress << " / 10,00,000" << endl;
 
 		fin >> dest;
 		fin >> Eweight;
 
-        if(nodeHash.find(src)==nodeHash.end() && nodeHash.find(dest)==nodeHash.end())
+        // Case 1: A and B both not present in any cluster.
+        if (nodeHash.find(src) == nodeHash.end() && nodeHash.find(dest) == nodeHash.end())
         {
-            if(N_of_cluster < 256)
+            // If we can create new cluster or not.
+            if (N_of_cluster < 256)
             {
-                // cout << " -------------------------------1.1 " << endl;
                 N_of_cluster++;
-                arrOfCluster[N_of_cluster].addEdge(src, dest, Eweight);
-                arrOfCluster[N_of_cluster].V +=2;
+
+                arrOfCluster[N_of_cluster].addEdge (src, dest, Eweight);
+                arrOfCluster[N_of_cluster].V += 2;
                 arrOfCluster[N_of_cluster].E++;
 
                 s_fileaddress = folder + itos(N_of_cluster) + ".bin";
 				address = s_fileaddress.c_str();
-                 
+
                 //save out cluster
                 ofstream fileOut;
-                fileOut.open(address, ios::out | ios::binary);
+                fileOut.open (address, ios::out | ios::binary);
                 tempGraph = &arrOfCluster[N_of_cluster];
                 fileOut.write ((char*)tempGraph, sizeof(graph));
-                fileOut.close();
+                fileOut.close ();
 
-                nodeHash.insert(make_pair(src, N_of_cluster));
-                nodeHash.insert(make_pair(dest, N_of_cluster));
+                nodeHash.insert (make_pair (src, N_of_cluster));
+                nodeHash.insert (make_pair (dest, N_of_cluster));
 
-                clusterSizeHash.insert(make_pair(N_of_cluster, 2)) ;
+                clusterSizeHash.insert (make_pair(N_of_cluster, 2)) ;
             }
-            else if(!emptyClusterQueue.empty())
-            {
-                // cout << " -------------------------------1.2 " << endl;
-                int clusterNum = emptyClusterQueue.front();
-                emptyClusterQueue.pop();
 
-                arrOfCluster[clusterNum].addEdge(src, dest, Eweight);
-                arrOfCluster[clusterNum].V +=2;
+            // Reusing the empty clusters.
+            else if (! emptyClusterQueue.empty ())
+            {
+                int clusterNum = emptyClusterQueue.front ();
+                emptyClusterQueue.pop ();
+
+                arrOfCluster[clusterNum].addEdge (src, dest, Eweight);
+                arrOfCluster[clusterNum].V += 2;
                 arrOfCluster[clusterNum].E++;
 
                 s_fileaddress = folder + itos(clusterNum) + ".bin";
 				address = s_fileaddress.c_str();
-                 
+
                 //save out cluster
                 ofstream fileOut;
-                fileOut.open(address, ios::out | ios::binary);
+                fileOut.open(address, ios::out | ios::binary | ios::trunc);
                 tempGraph = &arrOfCluster[clusterNum];
                 fileOut.write ((char*)tempGraph, sizeof(graph));
                 fileOut.close();
 
-                nodeHash.insert(make_pair(src, clusterNum));
-                nodeHash.insert(make_pair(dest, clusterNum));
+                nodeHash.insert (make_pair (src, clusterNum));
+                nodeHash.insert (make_pair (dest, clusterNum));
 
-                // clusterSizeHash.insert(make_pair(clusterNum, 2)) ;
-                clusterSizeHash.find(clusterNum)->second = 2;
+                clusterSizeHash.find (clusterNum)->second = 2;
             }
+
             else
             {
-                fout_edges << src << " " << dest << " " << Eweight << endl;
+                leftOutEdges << src << " " << dest << " " << Eweight << endl;
             }
         }
-        else if( (nodeHash.find(src)!=nodeHash.end())  &&(nodeHash.find(dest)!=nodeHash.end())  && (nodeHash.find(src)->second == nodeHash.find(dest)->second) )
+
+        // Case 2: A and B are present and are in same cluster.
+        else if ((nodeHash.find (src) != nodeHash.end())  && (nodeHash.find(dest) != nodeHash.end()) &&
+                (nodeHash.find (src)->second == nodeHash.find(dest)->second))
         {
-            // cout << " -------------------------------2 " << endl;
             src_cluster = nodeHash.find(src)->second;
             s_fileaddress = folder + itos(src_cluster) + ".bin";
 			address = s_fileaddress.c_str();
-            
+
             // read in cluster
+            ifstream fileIn;
+            fileIn.open (address, ios::in | ios::binary);
+            tempGraph = &arrOfCluster[src_cluster];
+            fileIn.read ((char*)tempGraph, sizeof(graph));
+            fileIn.close ();
+
+            arrOfCluster[src_cluster].addEdge(src, dest, Eweight);
+            arrOfCluster[src_cluster].E++;
+
+            // write out cluster
+            ofstream fileOut;
+            fileOut.open (address, ios::out | ios::binary);
+            tempGraph = &arrOfCluster[src_cluster];
+            fileOut.write ((char*)tempGraph, sizeof(graph));
+            fileOut.close ();
+
+        }
+
+        // Case 3: A not present and B present in cluster.
+        else if ((nodeHash.find(src) == nodeHash.end()) && (nodeHash.find (dest) != nodeHash.end()))
+        {
+                dest_cluster = nodeHash.find (dest)->second;
+				s_fileaddress = folder + itos(dest_cluster) + ".bin";
+				address = s_fileaddress.c_str();
+
+                // Read in cluster
+                ifstream fileIn;
+                fileIn.open (address, ios::in | ios::binary);
+                tempGraph = &arrOfCluster[dest_cluster];
+                fileIn.read ((char*)tempGraph, sizeof(graph));
+                fileIn.close ();
+
+				arrOfCluster[dest_cluster].addEdge (src, dest, Eweight);
+                arrOfCluster[dest_cluster].E++;
+                arrOfCluster[dest_cluster].V++;
+				nodeHash.insert (make_pair (src, dest_cluster));
+
+                // Write out cluster
+                ofstream fileOut;
+                fileOut.open (address, ios::out | ios::binary);
+                tempGraph = &arrOfCluster[dest_cluster];
+                fileOut.write ((char*)tempGraph, sizeof(graph));
+                fileOut.close ();
+
+				clusterSizeHash.find (dest_cluster)->second += 1;
+
+                // Check if size > cluster threshold size and partion the cluster
+                if (clusterSizeHash.find (dest_cluster)->second > cluster_thresold_size)
+                {
+                    vector <pair<long, long>> temp = kargerMinCut (&arrOfCluster[dest_cluster]);
+                    cout << temp.size() <<endl;
+                    vector <pair<long, long> >::iterator it_temp;
+                    for (it_temp = temp.begin(); it_temp != temp.end(); it_temp++)
+                        cout << it_temp->first << "====="<< it_temp->second << endl;
+                }
+        }
+
+        // Case 4: A is present and B is not present.
+        else if (nodeHash.find(src) != nodeHash.end() && nodeHash.find(dest) == nodeHash.end())
+        {
+            src_cluster = nodeHash.find(src)->second;
+            s_fileaddress = folder+itos(src_cluster)+".bin";
+            address = s_fileaddress.c_str();
+
+            // Read in cluster
             ifstream fileIn ;
             fileIn.open(address, ios::in | ios::binary);
             tempGraph = &arrOfCluster[src_cluster];
@@ -151,234 +225,140 @@ int main()
 
             arrOfCluster[src_cluster].addEdge(src, dest, Eweight);
             arrOfCluster[src_cluster].E++;
+            arrOfCluster[src_cluster].V++;
+            nodeHash.insert(make_pair(dest, src_cluster));
 
-            // write out cluster
+            // Write out cluster
             ofstream fileOut;
-            fileOut.open(address, ios::out | ios::binary);
+            fileOut.open (address, ios::out | ios::binary);
             tempGraph = &arrOfCluster[src_cluster];
             fileOut.write ((char*)tempGraph, sizeof(graph));
-            fileOut.close();
+            fileOut.close ();
 
+            clusterSizeHash.find (src_cluster)->second += 1;
+
+            // Check if size > cluster threshold size and partion the cluster
+            if(clusterSizeHash.find(src_cluster)->second > cluster_thresold_size)
+            {
+                vector <pair<long, long> > temp = kargerMinCut(&arrOfCluster[src_cluster]);
+                set<long>::iterator it;
+            }
         }
-        else if( (nodeHash.find(src)==nodeHash.end())  &&   (nodeHash.find(dest)!=nodeHash.end()) )
-        {
-                // cout << " -------------------------------3 " << endl;
-				dest_cluster = nodeHash.find(dest)->second;
-				//cout << dest_cluster << "----" << dest_cluster << endl;
-				s_fileaddress = folder+itos(dest_cluster)+".bin";
-				address = s_fileaddress.c_str();
 
-                //  read in cluster
-                ifstream fileIn ;
-                fileIn.open(address, ios::in | ios::binary);
-                tempGraph = &arrOfCluster[dest_cluster];
-                fileIn.read ((char*)tempGraph, sizeof(graph));
-                fileIn.close();
-
-				arrOfCluster[dest_cluster].addEdge(src, dest, Eweight);
-                arrOfCluster[dest_cluster].E++;
-                arrOfCluster[dest_cluster].V++; 
-				nodeHash.insert(make_pair(src, dest_cluster));
-
-                // write out cluster
-                ofstream fileOut;
-                fileOut.open(address, ios::out | ios::binary);
-                tempGraph = &arrOfCluster[dest_cluster];
-                fileOut.write ((char*)tempGraph, sizeof(graph));
-                fileOut.close();
-
-
-				clusterSizeHash.find(dest_cluster)->second += 1;
-
-                //check size ..........than ...apply kernigham lin min cut ....
-                if(clusterSizeHash.find(dest_cluster)->second > cluster_thresold_size)
-                {
-                    cout << "in here 1-------------------------------------------------------------";
-                    vector <pair<long, long> > temp = kargerMinCut(&arrOfCluster[dest_cluster]);
-                    cout << temp.size()<<endl;
-                    vector <pair<long, long> >:: iterator it_temp;
-                    for(it_temp = temp.begin(); it_temp !=temp.end(); it_temp++)
-                        cout << it_temp->first << "====="<< it_temp->second << endl;
-                }
-        }
-        else if( nodeHash.find(src)!=nodeHash.end() && nodeHash.find(dest)==nodeHash.end() )
-        {
-                // cout << " -------------------------------4 " << endl;
-				src_cluster = nodeHash.find(src)->second;
-				//cout << src_cluster << "----" << src_cluster << endl;
-				s_fileaddress = folder+itos(src_cluster)+".bin";
-				address = s_fileaddress.c_str();
-
-                // read in cluster
-                ifstream fileIn ;
-                fileIn.open(address, ios::in | ios::binary);
-                tempGraph = &arrOfCluster[src_cluster];
-                fileIn.read ((char*)tempGraph, sizeof(graph));
-                fileIn.close();
-
-				arrOfCluster[src_cluster].addEdge(src, dest, Eweight);
-                arrOfCluster[src_cluster].E++;
-                arrOfCluster[src_cluster].V++; 
-				nodeHash.insert(make_pair(dest, src_cluster));
-
-                //write out cluster
-                ofstream fileOut;
-                fileOut.open(address, ios::out | ios::binary);
-                tempGraph = &arrOfCluster[src_cluster];
-                fileOut.write ((char*)tempGraph, sizeof(graph));
-                fileOut.close();
-
-				clusterSizeHash.find(src_cluster)->second += 1;
-
-				//check size ..........than ...apply kernigham lin min cut ....
-                if(clusterSizeHash.find(src_cluster)->second > cluster_thresold_size)
-                {
-                    cout << "in here -------------------------------------------------------------";
-                    vector <pair<long, long> > temp = kargerMinCut(&arrOfCluster[src_cluster]);
-                    // set<long>::iterator it;
-                    // for(it = firstGraphNodeList.begin(); it!=firstGraphNodeList.end(); it++)
-                    //     cout << *it <<"-";
-                    // cout <<"mmmm  " << firstGraphNodeList.size()<< endl;
-                
-                    // for(it = secondGraphNodeList.begin(); it!=secondGraphNodeList.end(); it++)
-                    //     cout << *it <<"-";
-                    // cout << endl;
-                }
-        }
+        // Case 5: A and B both present in different cluster.
         else
         {
-                // cout << " -------------------------------5 " << endl;
-				src_cluster = nodeHash.find(src)->second;
-				dest_cluster = nodeHash.find(dest)->second;
+            src_cluster = nodeHash.find (src)->second;
+            dest_cluster = nodeHash.find (dest)->second;
 
-				src_cluster_size = clusterSizeHash.find(src_cluster)->second;
-				dest_cluster_size = clusterSizeHash.find(dest_cluster)->second;
-				//cout << endl << src_cluster_size <<"-------------------------------"<<dest_cluster_size << endl;
+            src_cluster_size = clusterSizeHash.find (src_cluster)->second;
+            dest_cluster_size = clusterSizeHash.find (dest_cluster)->second;
 
-				int EId, SrcNId, DstNId, EdgeWeight;
+            int EId, SrcNId, DstNId, EdgeWeight;
 
-				if(src_cluster_size + dest_cluster_size < cluster_thresold_size)
-				{
-                    // cout << " -------------------------------if " << endl;
-                    // cout << " ------------------------------- " << src_cluster << "--" << dest_cluster << endl;
-                    // cout << " ------------------------------- " << src_cluster_size << "--" << dest_cluster_size << endl;
-                    int biggerCluster, smallerCluster;
-					if(src_cluster_size >= dest_cluster_size)
-					{
-                        biggerCluster = src_cluster;
-                        smallerCluster = dest_cluster;
-                    }
-                    else
-                    {
-                        biggerCluster = dest_cluster;
-                        smallerCluster = src_cluster;
-                    }
-						//cout << "dest less than source";
-						//make one cluster src_cluster+dest_cluster and delete the dest_cluster
-						s_fileaddress = folder+itos(src_cluster)+".bin";
-						address = s_fileaddress.c_str();
+            // If size (1 + 2) < cluster_threshold_size then Merge them.
+            if(src_cluster_size + dest_cluster_size < cluster_thresold_size)
+            {
+                int biggerCluster, smallerCluster;
 
-                        ifstream fileIn ;
-                        fileIn.open(address, ios::in | ios::binary);
-                        tempGraph = &arrOfCluster[src_cluster];
-                        fileIn.read ((char*)tempGraph, sizeof(graph));
-                        fileIn.close();
+                if(src_cluster_size >= dest_cluster_size)
+                {
+                    biggerCluster = src_cluster;
+                    smallerCluster = dest_cluster;
+                }
 
-						s_fileaddress = folder+itos(dest_cluster)+".bin";
-						address = s_fileaddress.c_str();
+                else
+                {
+                    biggerCluster = dest_cluster;
+                    smallerCluster = src_cluster;
+                }
 
-                        ifstream fileIn2 ;
-                        fileIn2.open(address, ios::in | ios::binary);
-                        tempGraph = &arrOfCluster[dest_cluster];
-                        fileIn2.read ((char*)tempGraph, sizeof(graph));
-                        fileIn2.close();
+                // Make one cluster src_cluster + dest_cluster and delete the dest_cluster
+                s_fileaddress = folder + itos(src_cluster) + ".bin";
+                address = s_fileaddress.c_str();
 
-                        vector<Edge> ::iterator EI ;
-  						for ( EI = arrOfCluster[smallerCluster].edgeList.begin(); EI != arrOfCluster[smallerCluster].edgeList.end(); EI++) 
-						{
-    						SrcNId = EI->src;
-    						DstNId = EI->dest;
-    						EdgeWeight = EI->weight;
+                ifstream fileIn ;
+                fileIn.open (address, ios::in | ios::binary);
+                tempGraph = &arrOfCluster[src_cluster];
+                fileIn.read ((char*)tempGraph, sizeof(graph));
+                fileIn.close ();
 
-							if(nodeHash.find(SrcNId)->second != biggerCluster)
-							{
-								nodeHash.find(SrcNId)->second = biggerCluster;
-                                arrOfCluster[biggerCluster].V++;
-							}
+                s_fileaddress = folder + itos(dest_cluster) + ".bin";
+                address = s_fileaddress.c_str();
 
-							if(nodeHash.find(DstNId)->second != biggerCluster)
-							{
-								nodeHash.find(DstNId)->second = biggerCluster;
-                                arrOfCluster[biggerCluster].V++;
-							}
+                ifstream fileIn2 ;
+                fileIn2.open (address, ios::in | ios::binary);
+                tempGraph = &arrOfCluster[dest_cluster];
+                fileIn2.read ((char*)tempGraph, sizeof(graph));
+                fileIn2.close();
 
-							arrOfCluster[biggerCluster].addEdge(SrcNId, DstNId, EdgeWeight);
-                            arrOfCluster[biggerCluster].E++;
+                vector<Edge>::iterator EI;
+                for (EI = arrOfCluster[smallerCluster].edgeList.begin(); EI != arrOfCluster[smallerCluster].edgeList.end(); EI++)
+                {
+                    SrcNId = EI->src;
+                    DstNId = EI->dest;
+                    EdgeWeight = EI->weight;
+
+                    nodeHash.find (SrcNId)->second = biggerCluster;
+                    arrOfCluster[biggerCluster].V++;
 
 
-  						}
-						clusterSizeHash.find(biggerCluster)->second = clusterSizeHash.find(biggerCluster)->second + clusterSizeHash.find(smallerCluster)->second;
-						clusterSizeHash.find(smallerCluster)->second = 0;
-						//cout << endl << clusterSizeHash.GetDat(src_cluster)  <<"-----------"<<clusterSizeHash.GetDat(dest_cluster) << endl;
+                    nodeHash.find(DstNId)->second = biggerCluster;
+                    arrOfCluster[biggerCluster].V++;
 
-                        arrOfCluster[smallerCluster].clr();
-						emptyClusterQueue.push(smallerCluster);
-						fout << smallerCluster <<endl;
+                    arrOfCluster[biggerCluster].addEdge (SrcNId, DstNId, EdgeWeight);
+                    arrOfCluster[biggerCluster].E++;
+                }
 
-						s_fileaddress = folder+itos(src_cluster)+".bin";
-						address = s_fileaddress.c_str();
+                clusterSizeHash.find(biggerCluster)->second = clusterSizeHash.find(biggerCluster)->second + clusterSizeHash.find(smallerCluster)->second;
+                clusterSizeHash.find(smallerCluster)->second = 0;
+                
+                arrOfCluster[smallerCluster].clr();
+                emptyClusterQueue.push (smallerCluster);
 
-                        ofstream fileOut;
-                        fileOut.open(address, ios::out | ios::binary);
-                        tempGraph = &arrOfCluster[src_cluster];
-                        fileOut.write ((char*)tempGraph, sizeof(graph));
-                        fileOut.close();
+                deletedCluster << smallerCluster << endl;
 
-						s_fileaddress = folder+itos(dest_cluster)+".bin";
-						address = s_fileaddress.c_str();
+                s_fileaddress = folder + itos(src_cluster) + ".bin";
+                address = s_fileaddress.c_str();
 
-                        ofstream fileOut2;
-                        fileOut2.open(address, ios::out | ios::binary);
-                        tempGraph = &arrOfCluster[dest_cluster];
-                        fileOut2.write ((char*)tempGraph, sizeof(graph));
-                        fileOut2.close();
-					
-				}
-				else
-				{
-					fout_Ecut << src << " " << dest << " " << Eweight <<  "    "<<src_cluster_size << "---"<< dest_cluster_size<< endl;
-				}
+                // Writing back the src cluster.
+                ofstream fileOut;
+                fileOut.open (address, ios::out | ios::binary);
+                tempGraph = &arrOfCluster[src_cluster];
+                fileOut.write ((char*)tempGraph, sizeof(graph));
+                fileOut.close ();
+
+                s_fileaddress = folder + itos (dest_cluster) + ".bin";
+                address = s_fileaddress.c_str();
+
+                // Writing back the des cluster.
+                ofstream fileOut2;
+                fileOut2.open(address, ios::out | ios::binary);
+                tempGraph = &arrOfCluster[dest_cluster];
+                fileOut2.write ((char*)tempGraph, sizeof(graph));
+                fileOut2.close();
+            }
+
+            else
+            {
+                fout_Ecut << src << " " << dest << " " << Eweight <<  "    "<< src_cluster_size << "---" << dest_cluster_size<< endl;
+            }
         }
 
     }
 
     ofstream fout_HMnodesC;
-	fout_HMnodesC.open("cluster_NofNodes.dat");
+	fout_HMnodesC.open ("cluster_NofNodes.dat");
 	int Key, Value;
 	unordered_map<long, int>::iterator itt;
   	for ( itt = clusterSizeHash.begin(); itt != clusterSizeHash.end(); itt++) {
 		fout_HMnodesC << itt->first << "----> "<<itt->second<<"    -    "<< arrOfCluster[itt->first].V << "---" << arrOfCluster[itt->first].E <<  endl;
   	}
+
     //   fout_HMnodesC << arrOfCluster[255].V << "---" << arrOfCluster[255].E << ",  "<< arrOfCluster[256].V << "---" << arrOfCluster[256].E <<endl;
 	fin.close();
-	fout.close();
-    fout_edges.close();
+	deletedCluster.close();
+    leftOutEdges.close();
 	fout_HMnodesC.close();
 	fout_Ecut.close();
-    // graph* graph1 = createGraph();
-    // addEdge(graph1, 2, 1, 0.5);
-    // addEdge(graph1, 2, 3, 0.5);
-    // // addEdge(graph1, 1, 2);
-    // addEdge(graph1, 2, 4, 0.5);
-    // addEdge(graph1, 3, 0, 0.5);
-    // addEdge(graph1, 4, 1, 0.5);
-    // printGraph(graph1);
-
-    // cout << endl<<endl;
-
-    // srand(time(NULL));
- 
-    // printf("\nCut found by Karger's randomized algo is %d\n",
-    //        kargerMinCut(graph1));
-
 }
