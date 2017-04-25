@@ -87,14 +87,11 @@ class graph
 
 };
 
-
-
- 
-// Function prototypes for union-find (These functions are defined
-// after kargerMinCut() )
 extern int find(struct subset subsets[], long i);
 extern void Union(struct subset subsets[], int x, int y);
 extern vector <pair<long, long> > kargerMinCut(graph* newgraph);
 
 
 #endif
+
+
