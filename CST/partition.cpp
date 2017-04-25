@@ -147,58 +147,30 @@ void partitionGraph (std::vector<Node> &CST, int k)
 
 void writePartition (std::vector<Node> &CST, int k)
 {
-  // // Open all the partition files
-  // char **fNames = new char *[k];
-  // for (int i = 0; i < k; i++)
-  // {
-  //   fNames[i] = new char[50];
-  //   if (fNames[i] == NULL)
-  //   {
-  //     std::cerr << "Error allocating memory";
-  //     return;
-  //   }
+  std::ofstream *fPtr = new std::ofstream[k];
 
-  //   sprintf(fNames[i], "part_%d.txt", i + 1);
-  // }
+  char **fileName = new char *[k];
+  for (int i = 0; i < k; i++)
+    fileName[i] = new char[50];
 
-  // std::ofstream *fPtr = new std::ofstream [k];
-  // for (int i = 0; i < k; i++)
-  //   fPtr[i].open (fNames[i], std::ios::out | std::ios::binary);
-
-  std::ofstream fPtr1, fPtr2, fPtr3;
-
-  fPtr1.open ("part_1.bin", std::ios::out | std::ios::binary);
-  fPtr2.open ("part_2.bin", std::ios::out | std::ios::binary);
-  fPtr3.open ("part_3.bin", std::ios::out | std::ios::binary);
+  for (int i = 0; i < k; i++)
+  {
+    sprintf (fileName[i], "part_%d.txt", i + 1);
+    fPtr[i].open (fileName[i], std::ios::out);
+  }
 
   for (std::vector<int>::size_type i = 0; i != CST.size(); i++)
   {
-    if (partHash[i] == 1)
-    {
-      std::cout << "Part 1:" << std::endl;
-      displayNode (CST[i], i);
-      fPtr1.write ((char *) &CST[i], sizeof (CST[i]));
-    }
-    else if(partHash[i] == 2)
-    {
-      std::cout << "Part 2: " << std::endl;
-      displayNode (CST[i], i);
-      fPtr2.write ((char *) &CST[i], sizeof (CST[i]));
-    }
-    else if(partHash[i] == 3)
-    {
-      std::cout << "Part 3: " << std::endl;
-      displayNode (CST[i], i);
-      fPtr3.write ((char *) &CST[i], sizeof (CST[i]));
-    }
+    if (partHash[i] >= 1 && partHash[i] <= k)
+      fPtr[partHash[i] - 1] << CST[i].userId << std::endl;
   }
 
+  for (int i = 0; i < k; i++)
+    fPtr[i].close();
+   
+  for (int i = 0; i < k; i++)
+    delete[] fileName[i];
+  delete[] fileName;
 
-  // for (int i = 0; i < k; i++)
-  // {
-  //   fPtr[i].close();
-  //   delete fNames[i];
-  // }
-  // delete fPtr;
-
+  delete[] fPtr;
 }
