@@ -84,7 +84,7 @@ void assignPart (std::vector<Node> &CST, int nodeIdx, int currPart)
 
   for(std::vector<int>::size_type i = 0; i != CST.size(); i++)
   {
-    if (CST[i].parentUserId == CST[nodeIdx].userId)
+    if ((CST[i].parentUserId == CST[nodeIdx].userId) && partHash[i] == 0)
     {
       assignPart (CST, i, currPart);
     }
