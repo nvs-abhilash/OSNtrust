@@ -20,10 +20,6 @@ using namespace std;
 unordered_map<long,long> nodeHash;
 unordered_map<long,int> clusterSizeHash;
 
-
-// set<long> firstGraphNodeList;
-// set<long> secondGraphNodeList;
-
 //--------------------------------------------------------------------------------------------------------------
 //Karger in other file
 
@@ -36,7 +32,6 @@ string itos(int i) // convert int to string
     return s.str();
 }
 
-
 //-------------------------------------------------------------------------------------------------------------
 int main()
 {
@@ -46,10 +41,6 @@ int main()
     int N_of_cluster = 0;
     int dest_cluster = 0, src_cluster = 0, src_cluster_size = 0, dest_cluster_size = 0;
 
-    string folder = "cluster/";
-    string s_fileaddress = "";
-
-    const char *address = NULL;
     queue<int> emptyClusterQueue;
     graph* tempGraph = NULL;
 
@@ -95,16 +86,6 @@ int main()
                 arrOfCluster[N_of_cluster].V += 2;
                 arrOfCluster[N_of_cluster].E++;
 
-                s_fileaddress = folder + itos(N_of_cluster) + ".bin";
-				address = s_fileaddress.c_str();
-
-                //save out cluster
-                ofstream fileOut;
-                fileOut.open (address, ios::out | ios::binary);
-                tempGraph = &arrOfCluster[N_of_cluster];
-                fileOut.write ((char*)tempGraph, sizeof(graph));
-                fileOut.close ();
-
                 nodeHash.insert (make_pair (src, N_of_cluster));
                 nodeHash.insert (make_pair (dest, N_of_cluster));
 
@@ -120,16 +101,6 @@ int main()
                 arrOfCluster[clusterNum].addEdge (src, dest, Eweight);
                 arrOfCluster[clusterNum].V += 2;
                 arrOfCluster[clusterNum].E++;
-
-                s_fileaddress = folder + itos(clusterNum) + ".bin";
-				address = s_fileaddress.c_str();
-
-                //save out cluster
-                ofstream fileOut;
-                fileOut.open(address, ios::out | ios::binary | ios::trunc);
-                tempGraph = &arrOfCluster[clusterNum];
-                fileOut.write ((char*)tempGraph, sizeof(graph));
-                fileOut.close();
 
                 nodeHash.insert (make_pair (src, clusterNum));
                 nodeHash.insert (make_pair (dest, clusterNum));
@@ -148,25 +119,9 @@ int main()
                 (nodeHash.find (src)->second == nodeHash.find(dest)->second))
         {
             src_cluster = nodeHash.find(src)->second;
-            s_fileaddress = folder + itos(src_cluster) + ".bin";
-			address = s_fileaddress.c_str();
-
-            // read in cluster
-            ifstream fileIn;
-            fileIn.open (address, ios::in | ios::binary);
-            tempGraph = &arrOfCluster[src_cluster];
-            fileIn.read ((char*)tempGraph, sizeof(graph));
-            fileIn.close ();
 
             arrOfCluster[src_cluster].addEdge(src, dest, Eweight);
             arrOfCluster[src_cluster].E++;
-
-            // write out cluster
-            ofstream fileOut;
-            fileOut.open (address, ios::out | ios::binary);
-            tempGraph = &arrOfCluster[src_cluster];
-            fileOut.write ((char*)tempGraph, sizeof(graph));
-            fileOut.close ();
 
         }
 
@@ -174,27 +129,11 @@ int main()
         else if ((nodeHash.find(src) == nodeHash.end()) && (nodeHash.find (dest) != nodeHash.end()))
         {
                 dest_cluster = nodeHash.find (dest)->second;
-				s_fileaddress = folder + itos(dest_cluster) + ".bin";
-				address = s_fileaddress.c_str();
-
-                // Read in cluster
-                ifstream fileIn;
-                fileIn.open (address, ios::in | ios::binary);
-                tempGraph = &arrOfCluster[dest_cluster];
-                fileIn.read ((char*)tempGraph, sizeof(graph));
-                fileIn.close ();
 
 				arrOfCluster[dest_cluster].addEdge (src, dest, Eweight);
                 arrOfCluster[dest_cluster].E++;
                 arrOfCluster[dest_cluster].V++;
 				nodeHash.insert (make_pair (src, dest_cluster));
-
-                // Write out cluster
-                ofstream fileOut;
-                fileOut.open (address, ios::out | ios::binary);
-                tempGraph = &arrOfCluster[dest_cluster];
-                fileOut.write ((char*)tempGraph, sizeof(graph));
-                fileOut.close ();
 
 				clusterSizeHash.find (dest_cluster)->second += 1;
 
@@ -213,27 +152,11 @@ int main()
         else if (nodeHash.find(src) != nodeHash.end() && nodeHash.find(dest) == nodeHash.end())
         {
             src_cluster = nodeHash.find(src)->second;
-            s_fileaddress = folder+itos(src_cluster)+".bin";
-            address = s_fileaddress.c_str();
-
-            // Read in cluster
-            ifstream fileIn ;
-            fileIn.open(address, ios::in | ios::binary);
-            tempGraph = &arrOfCluster[src_cluster];
-            fileIn.read ((char*)tempGraph, sizeof(graph));
-            fileIn.close();
 
             arrOfCluster[src_cluster].addEdge(src, dest, Eweight);
             arrOfCluster[src_cluster].E++;
             arrOfCluster[src_cluster].V++;
             nodeHash.insert(make_pair(dest, src_cluster));
-
-            // Write out cluster
-            ofstream fileOut;
-            fileOut.open (address, ios::out | ios::binary);
-            tempGraph = &arrOfCluster[src_cluster];
-            fileOut.write ((char*)tempGraph, sizeof(graph));
-            fileOut.close ();
 
             clusterSizeHash.find (src_cluster)->second += 1;
 
@@ -274,23 +197,6 @@ int main()
                 }
 
                 // Make one cluster src_cluster + dest_cluster and delete the dest_cluster
-                s_fileaddress = folder + itos(src_cluster) + ".bin";
-                address = s_fileaddress.c_str();
-
-                ifstream fileIn ;
-                fileIn.open (address, ios::in | ios::binary);
-                tempGraph = &arrOfCluster[src_cluster];
-                fileIn.read ((char*)tempGraph, sizeof(graph));
-                fileIn.close ();
-
-                s_fileaddress = folder + itos(dest_cluster) + ".bin";
-                address = s_fileaddress.c_str();
-
-                ifstream fileIn2 ;
-                fileIn2.open (address, ios::in | ios::binary);
-                tempGraph = &arrOfCluster[dest_cluster];
-                fileIn2.read ((char*)tempGraph, sizeof(graph));
-                fileIn2.close();
 
                 vector<Edge>::iterator EI;
                 for (EI = arrOfCluster[smallerCluster].edgeList.begin(); EI != arrOfCluster[smallerCluster].edgeList.end(); EI++)
@@ -318,25 +224,6 @@ int main()
 
                 deletedCluster << smallerCluster << endl;
 
-                s_fileaddress = folder + itos(src_cluster) + ".bin";
-                address = s_fileaddress.c_str();
-
-                // Writing back the src cluster.
-                ofstream fileOut;
-                fileOut.open (address, ios::out | ios::binary);
-                tempGraph = &arrOfCluster[src_cluster];
-                fileOut.write ((char*)tempGraph, sizeof(graph));
-                fileOut.close ();
-
-                s_fileaddress = folder + itos (dest_cluster) + ".bin";
-                address = s_fileaddress.c_str();
-
-                // Writing back the des cluster.
-                ofstream fileOut2;
-                fileOut2.open(address, ios::out | ios::binary);
-                tempGraph = &arrOfCluster[dest_cluster];
-                fileOut2.write ((char*)tempGraph, sizeof(graph));
-                fileOut2.close();
             }
 
             else
