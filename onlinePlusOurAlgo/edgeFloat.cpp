@@ -197,11 +197,12 @@ int main()
                 fileOut.close ();
 
 				clusterSizeHash.find (dest_cluster)->second += 1;
+                vector <pair<long, long>> temp;
 
                 // Check if size > cluster threshold size and partion the cluster
                 if (clusterSizeHash.find (dest_cluster)->second > cluster_thresold_size)
                 {
-                    vector <pair<long, long>> temp = kargerMinCut (&arrOfCluster[dest_cluster]);
+                    temp = kargerMinCut (&arrOfCluster[dest_cluster]);
                     cout << temp.size() <<endl;
                     vector <pair<long, long> >::iterator it_temp;
                     for (it_temp = temp.begin(); it_temp != temp.end(); it_temp++)
@@ -217,7 +218,7 @@ int main()
             address = s_fileaddress.c_str();
 
             // Read in cluster
-            ifstream fileIn ;
+            ifstream fileIn;
             fileIn.open(address, ios::in | ios::binary);
             tempGraph = &arrOfCluster[src_cluster];
             fileIn.read ((char*)tempGraph, sizeof(graph));
@@ -236,11 +237,12 @@ int main()
             fileOut.close ();
 
             clusterSizeHash.find (src_cluster)->second += 1;
+            vector <pair<long, long>> temp;
 
             // Check if size > cluster threshold size and partion the cluster
             if(clusterSizeHash.find(src_cluster)->second > cluster_thresold_size)
             {
-                vector <pair<long, long> > temp = kargerMinCut(&arrOfCluster[src_cluster]);
+                temp = kargerMinCut(&arrOfCluster[src_cluster]);
                 set<long>::iterator it;
             }
         }
