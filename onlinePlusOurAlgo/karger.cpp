@@ -17,9 +17,6 @@ using namespace std;
 // set<long> firstGraphNodeList;
 // set<long> secondGraphNodeList;
 
-
-unordered_map <long,pair<long,long> > subset;
- 
 // Function prototypes for union-find (These functions are defined
 // after kargerMinCut() )
 long find(unordered_map <long,pair<long,long> > &subset, long i);
@@ -35,6 +32,9 @@ vector <pair<long, long> > kargerMinCut(graph* newgraph)
     // cout << " In karger \n";
     // Get data of given graph
 
+    unordered_map <long,pair<long,long> > subset;
+
+
     int V = newgraph->V, E = newgraph->E;
     cout << "V:" << V << "  E: " << E << endl;
     vector<Edge> edge(newgraph->edgeList);
@@ -42,17 +42,18 @@ vector <pair<long, long> > kargerMinCut(graph* newgraph)
     set<long> vertices_set;
     vector<Edge> :: iterator it_edgeList;
     long src_edge, dest_edge;
+
+    // Creating the vertex set
     for(it_edgeList = edge.begin(); it_edgeList!=edge.end(); it_edgeList++)
     {
         // cout << "in for \n";
         src_edge = it_edgeList->src;
         dest_edge = it_edgeList->dest;
-      
+
         if(vertices_set.find(src_edge)==vertices_set.end())
         {
             vertices_set.insert(src_edge);
-        }
-            
+        }            
 
         if(vertices_set.find(dest_edge)==vertices_set.end())
         {
@@ -83,22 +84,22 @@ vector <pair<long, long> > kargerMinCut(graph* newgraph)
     int kk=0;
     int cnt=1;
 
-    while (vertices > 2 && randomVec.size() > 0)
+    while (vertices > 2)
     {
         // kk++;
         // cout <<kk;
         // cout << "in while " << kk << endl;
-       // Pick a random edge
-    //    int i = rand() % E;
-        kk = rand() % (randomVec.size());
-        int i = randomVec[kk];
-       // Find vertices (or sets) of two corners
-       // of current edge
-    //    cout << "i = " << i << "   kk: "<<kk<<endl;
-       int subset1 = find(subset, edge[i].src);
-       int subset2 = find(subset, edge[i].dest);
+        // Pick a random edge
+        int i = rand() % E;
+        // kk = rand() % (randomVec.size());
+        // int i = randomVec[kk];
+        // Find vertices (or sets) of two corners
+        // of current edge
+        // cout << "i = " << i << "   kk: "<<kk<<endl;
+        int subset1 = find(subset, edge[i].src);
+        int subset2 = find(subset, edge[i].dest);
 
-    //    cout << "Subset1: " << subset1 << " \t Subset2 = " << subset2 << endl;
+        // cout << "Subset1: " << subset1 << " \t Subset2 = " << subset2 << endl;
        // If two corners belong to same subset,
        // then no point considering this edge
     
@@ -140,13 +141,12 @@ vector <pair<long, long> > kargerMinCut(graph* newgraph)
     }
     cout << "rrrrrrrrrrrrr   "<<cutEdgeVec.size()<< endl;
     return cutEdgeVec;
-
 }
  
 // A utility function to find set of an element i
 // (uses path compression technique)
 
-long find(unordered_map <long,pair<long,long> > &subset, long i)
+long find(unordered_map <long,pair<long,long>> &subset, long i)
 {
     // find root and make root as parent of i
     // (path compression)
