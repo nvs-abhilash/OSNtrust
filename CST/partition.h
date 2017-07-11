@@ -1,7 +1,7 @@
 #ifndef PARTITION_H
 #define PARTITION_H
 
-extern void sortAmortized (std::vector<Node> &CST, int k);
+extern std::vector <Node> sortAmortized (int k);
 
 extern void unPropagate (std::vector <Node> &CST, int nodeId, int childNodeId);
 

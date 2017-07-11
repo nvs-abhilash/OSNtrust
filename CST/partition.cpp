@@ -17,13 +17,30 @@ bool compare(Node i1, Node i2)
     return ((i1.edgeWeight)/(i1.nodeWeight) < (i2.edgeWeight) / (i2.nodeWeight));
 }
 
-void sortAmortized (std::vector<Node> &CST, int k)
+std::vector <Node> sortAmortized (int k)
 {
-    sort(CST.begin(), CST.end(), compare);
+    Node *user = new Node;
+
+    std::ifstream fileIn (FILE_NAME, std::ios::in | std::ios::binary);
+
+    std::vector<Node> allUsers;
+
+    // Load all the users
+    fileIn.seekg (0, std::ios::beg);
+
+    while (fileIn.read ((char*) user, sizeof (Node)))
+        allUsers.push_back(*user);
+    // Call the sorting algorithm.
+    sort(allUsers.begin(), allUsers.end(), compare);
+
+    // Make a tree
 
     //Hash partition
-    partHash = new int[(int)CST.size()] ();
+    partHash = new int[(int)allUsers.size()] ();
     part = new int[k] ();
+
+    delete user;
+    return allUsers;
 }
 
 
@@ -139,7 +156,7 @@ void writePartition (std::vector<Node> &CST, int k)
 
   for (int i = 0; i < k; i++)
     fPtr[i].close();
-
+   
   for (int i = 0; i < k; i++)
     delete[] fileName[i];
   delete[] fileName;
