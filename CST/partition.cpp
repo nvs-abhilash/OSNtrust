@@ -17,30 +17,13 @@ bool compare(Node i1, Node i2)
     return ((i1.edgeWeight)/(i1.nodeWeight) < (i2.edgeWeight) / (i2.nodeWeight));
 }
 
-std::vector <Node> sortAmortized (int k)
+void sortAmortized (std::vector<Node> &CST, int k)
 {
-    Node *user = new Node;
-
-    std::ifstream fileIn (FILE_NAME, std::ios::in | std::ios::binary);
-
-    std::vector<Node> allUsers;
-
-    // Load all the users
-    fileIn.seekg (0, std::ios::beg);
-
-    while (fileIn.read ((char*) user, sizeof (Node)))
-        allUsers.push_back(*user);
-    // Call the sorting algorithm.
-    sort(allUsers.begin(), allUsers.end(), compare);
-
-    // Make a tree
+    sort(CST.begin(), CST.end(), compare);
 
     //Hash partition
-    partHash = new int[(int)allUsers.size()] ();
+    partHash = new int[(int)CST.size()] ();
     part = new int[k] ();
-
-    delete user;
-    return allUsers;
 }
 
 
@@ -96,7 +79,8 @@ void partitionGraph (std::vector<Node> &CST, int k)
   int currPart = 1;
   int partSize = ceil ((CST.size() - 1) / (float) k);
   int threshold = ceil (partSize / (float) 2);
-  int nodeIdx = -1, edgeCut = 0;
+  int nodeIdx = -1;
+  double edgeCut = 0;
 
   while(true)
   {
