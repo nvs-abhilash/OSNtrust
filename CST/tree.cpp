@@ -1,267 +1,139 @@
-#include <fstream>
 #include <string>
 #include <iostream>
+#include <vector>
 #include "graph.h"
-
-const char FILE_NAME[] = "CST_out.bin";
+#include <algorithm>
 
 // Initialize Tree: add the default head node
-void initializeTree ()
+void initializeTree (std::vector<Node> &CST)
 {
-    std::ofstream fileOut (FILE_NAME, std::ios::out | std::ios::binary);
-
     Node *head = new Node;
 
     head -> userId = -2;
     head -> parentUserId = -1;
-
     head -> nodeWeight = 0;
     head -> edgeWeight = 0;
 
-    fileOut.write ((char*)head, sizeof(Node));
+    CST.push_back (*head);
 
     delete head;
-    fileOut.close();
 }
 
 // Normal search function to search for the userId
-long int presentInTree (int nodeId)
+std::vector<Node>::iterator presentInTree (std::vector<Node> &CST, Node node)
 {
-    // Open the file
-    std::ifstream fileIn (FILE_NAME, std::ios::in | std::ios::binary);
+    for (std::vector<Node>::iterator it = CST.begin(); it != CST.end(); it++)
+      if (it->userId == node.userId)
+        return it;
 
-    Node *user = new Node;
-    long int pos = fileIn.tellg ();
-
-    while (fileIn.read ((char*) user, sizeof (Node)))
-    {
-        // Extract in the nodeUserId
-        if (user->userId == nodeId)
-        {
-            fileIn.close();
-            delete user;
-            return pos;
-        }
-        pos = fileIn.tellg ();
-    }
-    delete user;
-    fileIn.close();
-    return -1;
+    return CST.end();
 }
 
 // Connect: A simple write operation in the file.
-long int connect (Node &node1, Node &node2, double edgeWeight, long int node2Pos)
+void connect (std::vector<Node> &CST, Node &node1, Node &node2, double edgeWeight)
 {
-    // Find Node2
-    // Open the file
-    std::fstream fileInOut (FILE_NAME, std::ios::in | std::ios::out | std::ios::binary);
-
-    // Write the new node
-    fileInOut.seekp (0, std::ios::end);
-    node2Pos = fileInOut.tellp ();
     node1.parentUserId = node2.userId;
     node1.edgeWeight = edgeWeight;
 
-    fileInOut.write ((char *)&node1, sizeof(Node));
-
-    fileInOut.close();
-    return node2Pos;
+    CST.push_back (node1);
 }
 
-void getUser (Node &user)
+std::vector<Node>::iterator getNode (std::vector<Node> &CST, int nodeId)
 {
-  std::ifstream fileIn (FILE_NAME, std::ios::in | std::ios::binary);
-
-  Node *readNode = new Node;
-
-  while (!fileIn.eof())
+  //Try to optimize this
+  std::vector<Node>::iterator node;
+  for(node = CST.begin (); node != CST.end (); node ++)
   {
-      fileIn.read ((char*) readNode, sizeof (Node));
-
-      if (readNode->userId == user.userId)
-      {
-          user.parentUserId = readNode->parentUserId;
-          user.nodeWeight = readNode->nodeWeight;
-          user.edgeWeight = readNode->edgeWeight;
-
-          delete readNode;
-          fileIn.close ();
-          return;
-      }
+    if(node->userId == nodeId)
+      return node;
   }
-  delete readNode;
-  fileIn.close ();
-}
 
+  return CST.end();
+}
 
 // propagateNodeWeight: This function updates the weight of the parent
-void propagateNodeWeight (Node node1)
+void propagateNodeWeight (std::vector<Node> &CST, Node node)
 {
-    getUser (node1);
-
     // Find the parent of the node
-    long int parentUserId = node1.parentUserId;
-    long int pos;
+    std::vector<Node>::iterator parent = getNode (CST, node.parentUserId);
 
-    if (parentUserId != HEAD_PARENT_ID)
+    // while (parent->userId != HEAD_PARENT_ID)
+    while (parent != CST.end ())
     {
-        // Find the parent and update the nodeWeight.
-        std::fstream fileInOut (FILE_NAME, std::ios::in | std::ios::out | std::ios::binary);
-
-        Node *user = new Node;
-
-        pos = fileInOut.tellg();
-        while ((fileInOut.read ((char*) user, sizeof (Node))) && parentUserId != HEAD_PARENT_ID)
-        {
-            if (user->userId == parentUserId)
-            {
-                // User found, update the edge weight.
-                user->nodeWeight ++;
-                fileInOut.seekp(pos);
-                fileInOut.write ((char*) user, sizeof (Node));
-
-                parentUserId = user->parentUserId;
-                fileInOut.seekg(0, std::ios::beg);
-            }
-            pos = fileInOut.tellg();
-        }
-        delete user;
-        fileInOut.close();
+      // Find the parent and update the nodeWeight.
+      parent->nodeWeight ++;
+      // parent = user->parentUserId;
+      parent = getNode (CST, parent->parentUserId);
     }
 }
 
-int getDepth (Node node) {
-    std::ifstream fileIn (FILE_NAME, std::ios::in | std::ios::binary);
+long int getDepth (std::vector<Node> &CST, Node node)
+{
+    std::vector<Node>::iterator treeNode;
+    long int depth = 0;
+    int nodeUserId = node.userId;
 
-    Node *readNode = new Node;
-
-    int depth = 0, nodeUserId = node.userId;
-    while ((fileIn.read ((char*) readNode, sizeof (Node))) && (nodeUserId != HEAD_USER_ID))
+    while (nodeUserId != HEAD_USER_ID)
     {
-        if(readNode->userId == nodeUserId)
-        {
-            nodeUserId = readNode->parentUserId;
-            depth ++;
-            fileIn.seekg (0, std::ios::beg);
-        }
+        treeNode = getNode (CST, nodeUserId);
+        nodeUserId = treeNode->parentUserId;
+        depth ++;
     }
 
-    delete readNode;
-    fileIn.close ();
     return depth;
 }
 
-void propagateEdgeWeight (Node node1, Node node2, double edgeWeight)
+void propagateEdgeWeight (std::vector<Node> &CST, Node node1, Node node2, double edgeWeight)
 {
-    std::fstream fileInOut (FILE_NAME, std::ios::in | std::ios::out | std::ios::binary);
+    long int node1Depth, node2Depth, minDepth;
 
-    Node *readNode = new Node ();
-    long int parentNode1, parentNode2, pos, node1Depth, node2Depth, minDepth\
-    , findParent2 = 1, findParent1 = 1;
+    std::vector<Node>::iterator parentNode1 = getNode (CST, node1.userId);
+    std::vector<Node>::iterator parentNode2 = getNode (CST, node2.userId);
 
-    getUser (node1);
-    getUser (node2);
-
-    node1Depth = getDepth (node1);
-    node2Depth = getDepth (node2);
+    node1Depth = getDepth (CST, node1);
+    node2Depth = getDepth (CST, node2);
 
     if(node1Depth == node2Depth)
       minDepth = node1Depth;
     else
       minDepth = (node1Depth < node2Depth) ? node1Depth : node2Depth;
 
-    parentNode1 = node1.userId;
-    pos = fileInOut.tellg();
-    while ((node1Depth != minDepth) && (fileInOut.read ((char*) readNode, sizeof (Node))))
+    while (node1Depth != minDepth)
     {
-        if (readNode->userId == parentNode1)
-        {
-            //update node1's parent
-            readNode->edgeWeight += edgeWeight;
-            fileInOut.seekp (pos);
-            fileInOut.write ((char*) readNode, sizeof (Node));
-            parentNode1 = readNode->parentUserId;
-            node1Depth --;
-            fileInOut.seekg(0, std::ios::beg);
-        }
-        pos = fileInOut.tellg();
+        //update node1's parent
+        parentNode1->edgeWeight += edgeWeight;
+        parentNode1 = getNode (CST, parentNode1->parentUserId);
+        node1Depth --;
     }
 
-    fileInOut.seekg (0, std::ios::beg);
-    parentNode2 = node2.userId;
-    pos = fileInOut.tellg();
-    while ((node2Depth != minDepth) && (fileInOut.read ((char*) readNode, sizeof (Node))))
+    while (node2Depth != minDepth)
     {
-        if (readNode->userId == parentNode2)
-        {
-            //update node2's parent
-            readNode->edgeWeight += edgeWeight;
-            fileInOut.seekp (pos);
-            fileInOut.write ((char*) readNode, sizeof (Node));
-            parentNode2 = readNode->parentUserId;
-            node2Depth --;
-            fileInOut.seekg(std::ios::beg);
-        }
-        pos = fileInOut.tellg();
+        //update node2's parent
+        parentNode2->edgeWeight += edgeWeight;
+        parentNode2 = getNode (CST, parentNode2->parentUserId);
+        node2Depth --;
     }
 
-    fileInOut.seekg (0, std::ios::beg);
-    pos = fileInOut.tellg();
-    while (fileInOut.read ((char*) readNode, sizeof (Node)))
+    while (true)
     {
-        if (parentNode2 == parentNode1)
+        if (parentNode2->userId == parentNode1->userId)
         {
-            long int parentPos = presentInTree (parentNode1);
-            fileInOut.seekg(parentPos);
-            fileInOut.read ((char*) readNode, sizeof (Node));
-
-            readNode->edgeWeight += 2*edgeWeight;
-            fileInOut.seekp (parentPos);
-            fileInOut.write ((char*) readNode, sizeof (Node));
+            parentNode1->edgeWeight += 2*edgeWeight;
             break;
         }
-        else if (readNode->userId == parentNode2 && findParent2)
+        else
         {
-            //update node1
-            readNode->edgeWeight += edgeWeight;
-            fileInOut.seekp (pos);
-            fileInOut.write ((char*) readNode, sizeof (Node));
-            parentNode2 = readNode->parentUserId;
-            findParent2 = 0;
-            if(findParent1 == 0 && findParent2 == 0)
-            {
-              findParent2 = 1;
-              findParent1 = 1;
-              fileInOut.seekg(std::ios::beg);
-            }
+          parentNode1->edgeWeight += edgeWeight;
+          parentNode1 = getNode (CST, parentNode1->parentUserId);
+
+          parentNode2->edgeWeight += edgeWeight;
+          parentNode2 = getNode (CST, parentNode2->parentUserId);
         }
-        else if (readNode->userId == parentNode1 && findParent1)
-        {
-            //update node1
-            readNode->edgeWeight += edgeWeight;
-            fileInOut.seekp (pos);
-            fileInOut.write ((char*) readNode, sizeof (Node));
-            parentNode1 = readNode->parentUserId;
-            findParent1 = 0;
-            if(findParent1 == 0 && findParent2 == 0)
-            {
-              findParent2 = 1;
-              findParent1 = 1;
-              fileInOut.seekg(std::ios::beg);
-            }
-        }
-        pos = fileInOut.tellg();
     }
-
-
-
-    delete readNode;
-    fileInOut.close ();
 }
 
-void displayNode (Node user, int i)
+void displayNode (Node user)
 {
-    std::cout << "Node " << i << std::endl;
     std::cout << "-------------------" << std::endl;
     std::cout << "UserId: " << user.userId << std::endl;
     std::cout << "ParentUserId: " << user.parentUserId << std::endl;
@@ -270,19 +142,12 @@ void displayNode (Node user, int i)
     std::cout << std::endl;
 }
 
-void displayData ()
+void displayData (std::vector<Node> &CST)
 {
     // Open the file
-    std::ifstream fileIn (FILE_NAME, std::ios::in | std::ios::binary);
-
-    Node *user = new Node;
-    int i = 1;
-
-    while (fileIn.read ((char*) user, sizeof (Node)))
+    std::vector<Node>::iterator node;
+    for (node = CST.begin (); node != CST.end (); node ++)
     {
-        displayNode (*user, i);
-        i++;
+      displayNode (*node);
     }
-    delete user;
-    fileIn.close();
 }

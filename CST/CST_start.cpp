@@ -4,14 +4,15 @@
 #include <fstream>
 #include <string.h>
 #include <vector>
+#include <time.h>
 
 #include "graph.h"
 #include "tree.h"
 #include "partition.h"
 
-#define K 3
+#define K 256
 
-void updateCST (Edge e)
+void updateCST (std::vector<Node> &CST, Edge e)
 {
     Node node1, node2, head;
 
@@ -33,38 +34,37 @@ void updateCST (Edge e)
 
     double edgeWeight = e.getW();
 
-    long int present1 = presentInTree (node1.userId);
-    long int present2 = presentInTree (node2.userId);
+    std::vector<Node>::iterator present1 = presentInTree (CST, node1);
+    std::vector<Node>::iterator present2 = presentInTree (CST, node2);
 
-    if (present1 == -1)
+    if (present1 == CST.end ())
     {
-        if (present2 == -1)
+        if (present2 == CST.end ())
         {
-            present1 = connect (node1, head, 0, 0);
-            present2 = connect (node2, node1, edgeWeight, present1);
+            connect (CST, node1, head, 0);
+            connect (CST, node2, node1, edgeWeight);
 
-            propagateNodeWeight (node1);
-            propagateNodeWeight (node2);
+            propagateNodeWeight (CST, node1);
+            propagateNodeWeight (CST, node2);
         }
-
         else
         {
-            present1 = connect (node1, node2, edgeWeight, present2);
-            propagateNodeWeight (node1);
+            connect (CST, node1, node2, edgeWeight);
+            propagateNodeWeight (CST, node1);
         }
     }
 
     else
     {
-        if (present2 == -1)
+        if (present2 == CST.end())
         {
-            connect (node2, node1, edgeWeight, present1);
-            propagateNodeWeight (node2);
+            connect (CST, node2, node1, edgeWeight);
+            propagateNodeWeight (CST, node2);
         }
 
         else
         {
-            propagateEdgeWeight (node2, node1, edgeWeight);
+            propagateEdgeWeight (CST, node2, node1, edgeWeight);
         }
     }
 }
@@ -77,19 +77,26 @@ int main (int argc, char* argv[])
         return -1;
     }
 
+    clock_t t = clock();
+
     // Open the edges file
     char fileName[50];
     strcpy (fileName, argv[1]);
 
     std::fstream f (fileName);
 
-    initializeTree ();
+    std::vector<Node> CST;
+    // std::vector<int> userIdHash;
+    initializeTree (CST);
     long int node1 = 0;
     long int node2 = 0;
     double weight = 0;
 
+    long int i = 0;
     while (true)
     {
+        std::cout << "\r" << i++;
+        
         // Extract the edge
         f >> node1;
         // 2. Extract node2
@@ -102,26 +109,31 @@ int main (int argc, char* argv[])
         Edge e (node1, node2, weight);
 
         // Call the updateCST
-        updateCST (e);
+        updateCST (CST, e);
 
         if (f.eof())
           break;
     }
-    // displayData ();
+
+    displayData (CST);
 
     f.close ();
 
 
-    std::vector<Node> allUsers = sortAmortized (K);
+    sortAmortized (CST, K);
 
     // Print data
-    std::cout << allUsers.size() << std::endl;
+    // std::cout << allUsers.size() << std::endl;
     // for (std::vector<Node>::size_type i = 0; i != allUsers.size(); ++i)
     //     displayNode (allUsers[i], i);
 
-    partitionGraph (allUsers, K);
+    partitionGraph (CST, K);
 
-    writePartition (allUsers, K);
+    writePartition (CST, K);
+
+    t = clock() - t;
+
+    std::cerr << "\nTime: " << (double)t / CLOCKS_PER_SEC << std::endl;
 
     return 0;
 }
