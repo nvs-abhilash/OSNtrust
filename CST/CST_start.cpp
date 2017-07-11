@@ -4,12 +4,13 @@
 #include <fstream>
 #include <string.h>
 #include <vector>
+#include <time.h>
 
 #include "graph.h"
 #include "tree.h"
 #include "partition.h"
 
-#define K 3
+#define K 256
 
 void updateCST (std::vector<Node> &CST, Edge e)
 {
@@ -76,6 +77,8 @@ int main (int argc, char* argv[])
         return -1;
     }
 
+    clock_t t = clock();
+
     // Open the edges file
     char fileName[50];
     strcpy (fileName, argv[1]);
@@ -89,8 +92,11 @@ int main (int argc, char* argv[])
     long int node2 = 0;
     double weight = 0;
 
+    long int i = 0;
     while (true)
     {
+        std::cout << "\r" << i++;
+        
         // Extract the edge
         f >> node1;
         // 2. Extract node2
@@ -109,7 +115,7 @@ int main (int argc, char* argv[])
           break;
     }
 
-    // displayData (CST);
+    displayData (CST);
 
     f.close ();
 
@@ -124,6 +130,10 @@ int main (int argc, char* argv[])
     partitionGraph (CST, K);
 
     writePartition (CST, K);
+
+    t = clock() - t;
+
+    std::cerr << "\nTime: " << (double)t / CLOCKS_PER_SEC << std::endl;
 
     return 0;
 }
